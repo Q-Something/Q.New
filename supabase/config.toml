@@ -1,0 +1,23 @@
+
+project_id = "fwnngoxzljdkcwkgkyqu"
+
+[api]
+enabled = true
+
+[db]
+enabled = true
+
+[realtime]
+enabled = true
+
+[storage]
+enabled = true
+
+[auth]
+enabled = true
+site_url = "https://qsomething.vercel.app/"
+
+[functions]
+[functions.generate-learning-content]
+verify_jwt = false
+
