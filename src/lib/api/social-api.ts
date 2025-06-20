@@ -40,9 +40,9 @@ export interface ChatMessage {
   is_read: boolean;
   created_at: string;
   sender?: UserProfile;
-  reply_to?: string | null; // New: id of message this is a reply to
-  reply_to_message?: ChatMessage | null; // hydrated field
-  reactions?: { emoji: string; users: string[] }[]; // array of emoji reactions
+  reply_to?: string | null;
+  reply_to_message?: ChatMessage | null;
+  reactions?: { emoji: string; users: string[] }[];
 }
 
 export async function getCurrentUserProfile(): Promise<UserProfile | null> {
@@ -134,16 +134,16 @@ export async function getSmartSuggestions(): Promise<UserProfile[]> {
     // Score profiles based on similarity
     const scoredProfiles = (profiles || []).map(profile => {
       let score = 0;
-
+      
       // Same class
       if (profile.class === currentProfile.class) score += 30;
-
+      
       // Similar age (within 2 years)
       if (profile.age && currentProfile.age) {
         const ageDiff = Math.abs(profile.age - currentProfile.age);
         if (ageDiff <= 2) score += 20;
       }
-
+      
       // Shared hobbies
       if (profile.hobbies && currentProfile.hobbies) {
         const userHobbies = currentProfile.hobbies.split(',').map(h => h.trim().toLowerCase());
@@ -151,7 +151,7 @@ export async function getSmartSuggestions(): Promise<UserProfile[]> {
         const sharedHobbies = userHobbies.filter(h => profileHobbies.includes(h));
         score += sharedHobbies.length * 15;
       }
-
+      
       // Same exam prep
       if (profile.exam_prep === currentProfile.exam_prep && profile.exam_prep) score += 25;
 
@@ -284,7 +284,7 @@ export async function getChatRooms(): Promise<ChatRoom[]> {
     const roomsWithUsers = await Promise.all(
       (rooms || []).map(async (room) => {
         const otherUserId = room.user1_id === user.user.id ? room.user2_id : room.user1_id;
-
+        
         const { data: otherUser } = await supabase
           .from('profiles')
           .select('*')
@@ -343,86 +343,52 @@ export async function sendMessage(
   roomId: string,
   content: string,
   opts?: { replyTo?: ChatMessage | null }
-): Promise<ChatMessage> {
+): Promise<void> {
   try {
     const { data: user } = await supabase.auth.getUser();
     if (!user?.user) throw new Error('User not authenticated');
 
-    const payload = {
+    const payload: {
+      room_id: string;
+      sender_id: string;
+      content: string;
+      reply_to?: string | null;
+    } = {
       room_id: roomId,
       sender_id: user.user.id,
       content,
-      reply_to: opts?.replyTo?.id || null,
     };
+    
+    if (opts?.replyTo && opts.replyTo.id) {
+      payload.reply_to = opts.replyTo.id;
+    } else {
+      payload.reply_to = null;
+    }
 
-    // Fetch the inserted message with sender info
-    const { data: newMessage, error } = await supabase
+    const { error } = await supabase
       .from('chat_messages_new')
-      .insert(payload)
-      .select(`
-        *,
-        sender:sender_id (
-          id,
-          display_name,
-          username,
-          avatar_url,
-          uid,
-          age,
-          class,
-          education,
-          hobbies,
-          exam_prep,
-          instagram,
-          discord,
-          followers_count,
-          following_count,
-          mutual_sparks_count
-        )
-      `)
-      .single();
+      .insert(payload);
 
-    if (error || !newMessage) throw error || new Error("Message insertion failed");
+    if (error) throw error;
 
-    // Update the room timestamps
+    // Update room's last_message_at
     await supabase
       .from('chat_rooms')
       .update({
         updated_at: new Date().toISOString(),
-        last_message_at: new Date().toISOString(),
+        last_message_at: new Date().toISOString()
       })
       .eq('id', roomId);
 
-    // If message is a reply, hydrate it
-    let reply_to_message = null;
-    if (newMessage.reply_to) {
-      const { data: parentMsg } = await supabase
-        .from('chat_messages_new')
-        .select(`
-          id, 
-          content, 
-          sender_id,
-          sender:sender_id (display_name, avatar_url, uid)
-        `)
-        .eq('id', newMessage.reply_to)
-        .single();
+    // Broadcast the message for instant updates
+    const channel = supabase.channel(`room-${roomId}-realtime`);
+    await channel.send({
+      type: 'broadcast',
+      event: 'message_sent',
+      payload: { roomId, senderId: user.user.id }
+    });
 
-      if (parentMsg) {
-        reply_to_message = {
-          ...parentMsg,
-          sender: parentMsg.sender,
-        };
-      }
-    }
-
-    // Construct the final ChatMessage object
-    const chatMessage: ChatMessage = {
-      ...newMessage,
-      sender: newMessage.sender as UserProfile,
-      reply_to_message,
-      reactions: [],
-    };
-
-    return chatMessage;
+    console.log('Message sent successfully');
   } catch (error) {
     console.error('Error sending message:', error);
     throw error;
@@ -521,7 +487,7 @@ export async function getMessages(roomId: string): Promise<ChatMessage[]> {
       };
     }));
 
-    // Hydrate Reactions (fetch once then merge)
+    // Hydrate Reactions
     const reactionsByMsg = await getReactionsForRoom(roomId);
     const withReactions = messagesWithReplies.map((m: any) => ({
       ...m,
@@ -555,5 +521,28 @@ export async function markMessagesAsRead(roomId: string): Promise<void> {
       .from('chat_messages_new')
       .update({ is_read: true })
       .in('id', unreadIds);
+  }
+}
+
+/**
+ * Get unread message count for a specific room
+ */
+export async function getUnreadMessageCount(roomId: string): Promise<number> {
+  try {
+    const { data: user } = await supabase.auth.getUser();
+    if (!user?.user) return 0;
+
+    const { count, error } = await supabase
+      .from('chat_messages_new')
+      .select('*', { count: 'exact', head: true })
+      .eq('room_id', roomId)
+      .neq('sender_id', user.user.id)
+      .eq('is_read', false);
+
+    if (error) throw error;
+    return count || 0;
+  } catch (error) {
+    console.error('Error getting unread count:', error);
+    return 0;
   }
 }

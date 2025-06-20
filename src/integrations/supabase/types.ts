@@ -89,6 +89,13 @@ export type Database = {
             foreignKeyName: "chat_messages_new_sender_id_fkey"
             columns: ["sender_id"]
             isOneToOne: false
+            referencedRelation: "leaderboard_view"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "chat_messages_new_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -124,8 +131,22 @@ export type Database = {
             foreignKeyName: "chat_rooms_user1_id_fkey"
             columns: ["user1_id"]
             isOneToOne: false
+            referencedRelation: "leaderboard_view"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "chat_rooms_user1_id_fkey"
+            columns: ["user1_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chat_rooms_user2_id_fkey"
+            columns: ["user2_id"]
+            isOneToOne: false
+            referencedRelation: "leaderboard_view"
+            referencedColumns: ["user_id"]
           },
           {
             foreignKeyName: "chat_rooms_user2_id_fkey"
@@ -187,6 +208,13 @@ export type Database = {
             foreignKeyName: "daily_streak_collections_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "leaderboard_view"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "daily_streak_collections_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -209,6 +237,13 @@ export type Database = {
           visit_date?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "daily_visits_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "leaderboard_view"
+            referencedColumns: ["user_id"]
+          },
           {
             foreignKeyName: "daily_visits_user_id_fkey"
             columns: ["user_id"]
@@ -242,8 +277,22 @@ export type Database = {
             foreignKeyName: "follows_follower_id_fkey"
             columns: ["follower_id"]
             isOneToOne: false
+            referencedRelation: "leaderboard_view"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "follows_follower_id_fkey"
+            columns: ["follower_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "follows_following_id_fkey"
+            columns: ["following_id"]
+            isOneToOne: false
+            referencedRelation: "leaderboard_view"
+            referencedColumns: ["user_id"]
           },
           {
             foreignKeyName: "follows_following_id_fkey"
@@ -413,6 +462,13 @@ export type Database = {
             foreignKeyName: "point_transactions_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "leaderboard_view"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "point_transactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -526,6 +582,13 @@ export type Database = {
             foreignKeyName: "qstories_uploader_id_fkey"
             columns: ["uploader_id"]
             isOneToOne: false
+            referencedRelation: "leaderboard_view"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "qstories_uploader_id_fkey"
+            columns: ["uploader_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -597,8 +660,22 @@ export type Database = {
             foreignKeyName: "fk_sparked_friends_friend"
             columns: ["friend_id"]
             isOneToOne: false
+            referencedRelation: "leaderboard_view"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "fk_sparked_friends_friend"
+            columns: ["friend_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_sparked_friends_user"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "leaderboard_view"
+            referencedColumns: ["user_id"]
           },
           {
             foreignKeyName: "fk_sparked_friends_user"
@@ -632,6 +709,13 @@ export type Database = {
           week?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "study_badges_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "leaderboard_view"
+            referencedColumns: ["user_id"]
+          },
           {
             foreignKeyName: "study_badges_student_id_fkey"
             columns: ["student_id"]
@@ -679,6 +763,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_study_materials_profiles"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "leaderboard_view"
+            referencedColumns: ["user_id"]
+          },
           {
             foreignKeyName: "fk_study_materials_profiles"
             columns: ["user_id"]
@@ -733,6 +824,13 @@ export type Database = {
             foreignKeyName: "study_questions_author_id_fkey"
             columns: ["author_id"]
             isOneToOne: false
+            referencedRelation: "leaderboard_view"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "study_questions_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -773,6 +871,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "study_questions"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "study_submissions_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "leaderboard_view"
+            referencedColumns: ["user_id"]
           },
           {
             foreignKeyName: "study_submissions_student_id_fkey"
@@ -947,6 +1052,13 @@ export type Database = {
             foreignKeyName: "tbh_answers_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "leaderboard_view"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "tbh_answers_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -1012,6 +1124,13 @@ export type Database = {
             foreignKeyName: "user_points_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: true
+            referencedRelation: "leaderboard_view"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "user_points_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -1041,6 +1160,13 @@ export type Database = {
             foreignKeyName: "user_roles_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "leaderboard_view"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "user_roles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -1048,6 +1174,17 @@ export type Database = {
       }
     }
     Views: {
+      leaderboard_view: {
+        Row: {
+          display_name: string | null
+          login_streak: number | null
+          sparks: number | null
+          total_points: number | null
+          total_uploads: number | null
+          user_id: string | null
+        }
+        Relationships: []
+      }
       study_leaderboard_daily: {
         Row: {
           correct_count: number | null
@@ -1058,6 +1195,13 @@ export type Database = {
           student_id: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "study_submissions_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "leaderboard_view"
+            referencedColumns: ["user_id"]
+          },
           {
             foreignKeyName: "study_submissions_student_id_fkey"
             columns: ["student_id"]
@@ -1077,6 +1221,13 @@ export type Database = {
           student_id: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "study_submissions_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "leaderboard_view"
+            referencedColumns: ["user_id"]
+          },
           {
             foreignKeyName: "study_submissions_student_id_fkey"
             columns: ["student_id"]
