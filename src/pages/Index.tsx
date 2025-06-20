@@ -1,16 +1,12 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import FeatureCard from "@/components/FeatureCard";
-import { Book, BookOpen, Upload, Users } from "lucide-react";
-import { useEffect, useState, useRef } from "react";
-import { fetchTopUsers } from "@/lib/api/leaderboard-api";
-import { LeaderboardCard } from "@/components/leaderboard/LeaderboardCard";
+import { BookOpen, Upload, Users, Medal } from "lucide-react";
+import { useEffect, useRef } from "react";
 import { useDailyVisit } from "@/lib/hooks/useDailyVisit";
 import { useNavigate } from "react-router-dom";
-import { Medal } from "lucide-react";
+import { LeaderboardCard } from "@/components/leaderboard/LeaderboardCard";
 import { TBHCard } from "@/components/tbh/TBHCard";
-
-// sortLeaders function is no longer needed here, as the API handles sorting.
 
 const Index = () => {
   const features = [
@@ -21,32 +17,21 @@ const Index = () => {
     },
     {
       title: "Q.Material",
-      description: "Share and access high-quality study materials from a community of students across subjects.",
+      description:
+        "Share and access high-quality study materials from a community of students across subjects.",
       icon: Upload,
     },
     {
       title: "Q.Spark",
-      description: "Connect with study partners who share your academic goals and interests.",
+      description:
+        "Connect with study partners who share your academic goals and interests.",
       icon: Users,
     },
   ];
 
-  // Leaderboard state
-  const [leaders, setLeaders] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-
   useDailyVisit(); // Track daily visit and points
 
-  useEffect(() => {
-    // Fetch top 5 users, already sorted by the unified API function
-    fetchTopUsers(5).then(data => {
-      setLeaders(data); 
-      setLoading(false);
-    }).catch(() => setLoading(false));
-  }, []);
-
-  // Smoothly scroll to the TBH card if coming from "/#tbh" or the hash updates
   const tbhRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -56,7 +41,7 @@ const Index = () => {
         if (el) {
           el.scrollIntoView({ behavior: "smooth", block: "center" });
         }
-      }, 80); // Wait for page paint
+      }, 80);
     }
   }, []);
 
@@ -84,33 +69,28 @@ const Index = () => {
           </div>
         </div>
       </section>
-      {/* Move TBH Feature just below hero, above leaderboard */}
-      <section
-        className="container px-4 mt-[-40px] z-20 relative"
-        id="tbh"
-        ref={tbhRef}
-      >
+
+      {/* TBH Section */}
+      <section className="container px-4 mt-[-40px] z-20 relative" id="tbh" ref={tbhRef}>
         <TBHCard />
       </section>
+
       {/* Leaderboard Widget Section */}
       <section className="py-10 bg-gradient-to-bl from-qlearn-blue/10 to-qlearn-purple/10">
         <div className="container">
           <div className="flex items-center gap-2 mb-2">
             <Medal className="text-yellow-400" size={22} />
-            <h2 className="font-bold text-2xl">Overall Leaderboard</h2>
-            <button 
+            <h2 className="font-bold text-2xl">Top 5 Learners</h2>
+            <button
               onClick={() => navigate("/leaderboard")}
               className="ml-auto border rounded px-3 py-1 text-sm font-medium hover:bg-muted transition"
             >
               View Full Leaderboard
             </button>
           </div>
-          {/* Make sure sparks (coins) are always shown */}
-          <LeaderboardCard 
-            leaders={leaders} 
-            showSparks
-            sparkBy="followers_count"
-          />
+
+          {/* Only show top 5 users */}
+          <LeaderboardCard limit={5} />
         </div>
       </section>
 

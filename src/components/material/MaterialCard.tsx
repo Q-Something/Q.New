@@ -1,11 +1,20 @@
-
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Download, FileText, Trash } from "lucide-react";
 import { toast } from "sonner";
 import { useState } from "react";
-import { downloadStudyMaterial, StudyMaterial } from "@/lib/api/material-api";
+import {
+  downloadStudyMaterial,
+  StudyMaterial,
+} from "@/lib/api/material-api";
 
 interface MaterialCardProps {
   material: StudyMaterial;
@@ -14,29 +23,28 @@ interface MaterialCardProps {
   onDownloadUpdate?: (materialId: string, newCount: number) => void;
 }
 
-export function MaterialCard({ material, onDelete, canDelete, onDownloadUpdate }: MaterialCardProps) {
+export function MaterialCard({
+  material,
+  onDelete,
+  canDelete,
+  onDownloadUpdate,
+}: MaterialCardProps) {
   const [isDownloading, setIsDownloading] = useState(false);
-  const [localDownloadCount, setLocalDownloadCount] = useState(material.downloads);
+  const [localDownloadCount, setLocalDownloadCount] = useState(
+    material.downloads
+  );
 
   const handleDownload = async () => {
     try {
       setIsDownloading(true);
-      console.log("Downloading material:", material.id, "Current count:", localDownloadCount);
-      
       const { url, newCount } = await downloadStudyMaterial(material);
-      
-      // Update local state immediately
       setLocalDownloadCount(newCount);
-      
-      // Update parent component state
+
       if (onDownloadUpdate) {
         onDownloadUpdate(material.id, newCount);
       }
-      
-      // Open the URL in a new tab
-      window.open(url, '_blank');
-      
-      console.log("Download successful, new count:", newCount);
+
+      window.open(url, "_blank");
       toast.success("Download started");
     } catch (error) {
       console.error("Download error:", error);
@@ -47,7 +55,7 @@ export function MaterialCard({ material, onDelete, canDelete, onDownloadUpdate }
   };
 
   return (
-    <Card className="overflow-hidden flex flex-col">
+    <Card className="overflow-hidden flex flex-col border border-zinc-700 shadow-sm hover:border-zinc-600 transition-colors">
       <CardHeader className="p-4 pb-2">
         <div className="flex justify-between items-start">
           <CardTitle className="text-xl truncate">{material.title}</CardTitle>
@@ -71,21 +79,31 @@ export function MaterialCard({ material, onDelete, canDelete, onDownloadUpdate }
         </div>
       </CardContent>
       <CardFooter className="p-4 pt-0 flex gap-2">
-        <Button variant="outline" className="flex-1" disabled>
+        {/* Preview squeezes first */}
+        <Button
+          variant="outline"
+          className="min-w-0 flex-1 basis-1/4 truncate"
+          disabled
+        >
           <FileText className="mr-2 h-4 w-4" /> Preview
         </Button>
-        <Button 
-          className="flex-1" 
+
+        {/* Download squeezes second */}
+        <Button
+          className="min-w-0 flex-1 basis-1/3 truncate"
           onClick={handleDownload}
           disabled={isDownloading}
         >
-          <Download className="mr-2 h-4 w-4" /> {isDownloading ? "Downloading..." : "Download"}
+          <Download className="mr-2 h-4 w-4" />{" "}
+          {isDownloading ? "Downloading..." : "Download"}
         </Button>
+
+        {/* Delete stays fixed size with red tone */}
         {canDelete && onDelete && (
-          <Button 
-            variant="destructive" 
-            size="icon"
+          <Button
             onClick={() => onDelete(material)}
+            className="w-10 bg-red-100 text-red-600 hover:bg-red-200"
+            variant="ghost"
           >
             <Trash className="h-4 w-4" />
           </Button>

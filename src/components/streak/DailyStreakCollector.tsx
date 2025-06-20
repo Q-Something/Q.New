@@ -1,4 +1,3 @@
-
 import React, { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/context/auth-context";
@@ -8,33 +7,56 @@ import { toast } from "@/components/ui/use-toast";
 import { differenceInCalendarDays, addDays, format } from "date-fns";
 import { RewardCoin } from "./RewardCoin";
 
-// Helper to determine the current streak "start series", based on latest unbroken sequence of daily collections
-function getStreakStartDate(today: Date, collections: { streak_start_date: string, streak_day: number }[]) {
+// ✅ Define the correct type
+interface StreakCollection {
+  user_id: string;
+  collected_at: string; // ISO string
+  streak_day: number;
+  streak_start_date: string;
+}
+
+// ✅ Function to get current streak start date or reset if needed
+function getStreakStartDate(today: Date, collections: StreakCollection[]) {
   if (!collections.length) return today.toISOString().slice(0, 10);
-  // Sort by streak_start_date desc
-  const sorted = collections.map(x => x.streak_start_date).sort().reverse();
-  return sorted[0] || today.toISOString().slice(0, 10);
+
+  const sorted = collections
+    .sort((a, b) => new Date(b.collected_at).getTime() - new Date(a.collected_at).getTime());
+
+  const latest = sorted[0];
+  const completed = collections.filter(c => c.streak_start_date === latest.streak_start_date);
+  const all7Collected = completed.length === 7;
+
+  const lastCollectedDate = new Date(latest.collected_at);
+  const todayDiff = differenceInCalendarDays(today, lastCollectedDate);
+
+  if (all7Collected && todayDiff >= 1) {
+    return today.toISOString().slice(0, 10); // start new streak
+  }
+
+  return latest.streak_start_date;
 }
 
 export const DailyStreakCollector: React.FC = () => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
-  const [collections, setCollections] = useState<any[]>([]);
+  const [collections, setCollections] = useState<StreakCollection[]>([]);
   const [error, setError] = useState<string | null>(null);
+
+  const today = new Date();
 
   useEffect(() => {
     if (!user) return;
-    setLoading(true);
-    setError(null);
 
     const fetchCollections = async () => {
+      setLoading(true);
+      setError(null);
       try {
         const { data, error } = await supabase
           .from("daily_streak_collections")
           .select("*")
           .eq("user_id", user.id)
           .order("collected_at", { ascending: true });
-        if (error) setError(error.message);
+        if (error) throw error;
         setCollections(data || []);
       } catch (err: any) {
         setError(err.message || "Error loading streaks.");
@@ -46,12 +68,8 @@ export const DailyStreakCollector: React.FC = () => {
     fetchCollections();
   }, [user]);
 
-  // Calendar day string helpers
-  const today = new Date();
-
-  // Find current streak context
   const currentStreakStart = useMemo(() => getStreakStartDate(today, collections), [collections]);
-  // Filter for current streak
+
   const streakCollections = useMemo(
     () =>
       collections
@@ -60,7 +78,6 @@ export const DailyStreakCollector: React.FC = () => {
     [collections, currentStreakStart]
   );
 
-  // Array of day objects for this streak
   const streakDays = useMemo(
     () =>
       [...Array(7)].map((_, i) => {
@@ -72,63 +89,51 @@ export const DailyStreakCollector: React.FC = () => {
     [streakCollections]
   );
 
-  // ENFORCE: Only allow collection for the next sequential day, and only if the *calendar date* is after the last one
   const lastCollection = streakCollections.at(-1);
-  const nextAllowedDayIdx = streakDays.findIndex((d) => !d.collected); // 0-based index
+  const nextAllowedDayIdx = streakDays.findIndex((d) => !d.collected);
+
   let canCollect = false;
   let disabledReason = "";
   let nextAvailableDate: string | null = null;
 
   if (nextAllowedDayIdx === 0) {
-    // Day 1: allow if not yet collected
-    canCollect = !streakDays[0].collected && (!lastCollection || differenceInCalendarDays(today, new Date(lastCollection.collectedAt)) >= 0);
+    canCollect =
+      !streakDays[0].collected &&
+      (!lastCollection || differenceInCalendarDays(today, new Date(lastCollection.collected_at)) >= 0);
   } else if (nextAllowedDayIdx > 0 && lastCollection) {
-    // Only allow if this is the next calendar day after the last collected day
-    const lastCollectDate = new Date(lastCollection.collectedAt);
+    const lastCollectDate = new Date(lastCollection.collected_at);
     const diff = differenceInCalendarDays(today, lastCollectDate);
     if (diff === 1) {
       canCollect = true;
     } else if (diff < 1) {
-      // Too early (already claimed today, or trying to claim ahead)
       canCollect = false;
       nextAvailableDate = format(addDays(lastCollectDate, 1), "yyyy-MM-dd");
       disabledReason = `Next available: ${nextAvailableDate}`;
-    } else if (diff > 1) {
-      // Streak broken, must start new streak
+    } else {
       canCollect = false;
-      disabledReason = "You missed a day! Start a new streak tomorrow.";
+      disabledReason = "You missed a day! Streak reset.";
     }
   }
 
   const handleCollect = async (day: number) => {
     if (!user) return;
+    if (day !== nextAllowedDayIdx + 1 || !canCollect) {
+      toast({
+        title: "Not allowed",
+        description: "You can only collect one reward per day, in order.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setLoading(true);
     try {
-      // Calendar claim enforcement
-      if (day !== nextAllowedDayIdx + 1) {
-        toast({
-          title: "Not allowed",
-          description: "Please claim each day in order, one per calendar day.",
-          variant: "destructive",
-        });
-        setLoading(false);
-        return;
-      }
-      if (!canCollect) {
-        toast({
-          title: "Too early or late",
-          description: "You can only collect one day per real calendar day, in sequence.",
-          variant: "destructive",
-        });
-        setLoading(false);
-        return;
-      }
-      // Backend will enforce UNIQUE (user_id, streak_start_date, streak_day)
       const { error } = await supabase.from("daily_streak_collections").insert({
         user_id: user.id,
         streak_start_date: currentStreakStart,
         streak_day: day,
       });
+
       if (error) {
         toast({
           title: "Error",
@@ -143,12 +148,12 @@ export const DailyStreakCollector: React.FC = () => {
             <div className="flex items-center gap-2">
               <RewardCoin animate />
               <span>
-                You've collected <b>5 coins</b> for Day {day}! Come back tomorrow for more! 🎉
+                You've collected <b>5 coins</b> for Day {day}! 🎉
               </span>
             </div>
           ),
         });
-        // Refresh!
+
         const { data } = await supabase
           .from("daily_streak_collections")
           .select("*")
@@ -163,8 +168,9 @@ export const DailyStreakCollector: React.FC = () => {
         variant: "destructive",
       });
       setError(err.message);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
@@ -176,8 +182,8 @@ export const DailyStreakCollector: React.FC = () => {
         </h2>
         <p className="mb-4 text-center text-muted-foreground">
           Collect <span className="font-semibold">5 coins</span> daily by logging in and pressing the golden coin each day.
-          <br/>
-          <span className="text-xs text-gray-500">Only 1 collection per day. Missing a day resets your streak!</span>
+          <br />
+          <span className="text-xs text-gray-500">One reward per day. Missing a day resets your streak!</span>
         </p>
       </div>
       {loading ? (
@@ -190,19 +196,18 @@ export const DailyStreakCollector: React.FC = () => {
         <>
           <div className="grid grid-cols-7 gap-2 mb-4">
             {streakDays.map((d, i) => {
-              const locked =
-                i !== nextAllowedDayIdx || !canCollect;
+              const locked = i !== nextAllowedDayIdx || !canCollect;
               return (
                 <Button
                   key={i}
                   disabled={d.collected || locked}
-                  className={`flex flex-col items-center p-2 h-20 transition-all ${d.collected ? "bg-green-200 text-green-900" : ""} ${locked ? "opacity-60" : "hover-scale animate-fade-in"}`}
+                  className={`flex flex-col items-center p-2 h-20 transition-all ${
+                    d.collected ? "bg-green-200 text-green-900" : ""
+                  } ${locked ? "opacity-60" : "hover-scale animate-fade-in"}`}
                   onClick={() => handleCollect(i + 1)}
                 >
-                  <RewardCoin animate={(!d.collected && !locked)} />
-                  <span className="font-semibold">
-                    Day {i + 1}
-                  </span>
+                  <RewardCoin animate={!d.collected && !locked} />
+                  <span className="font-semibold">Day {i + 1}</span>
                   {d.collected ? (
                     <span className="text-xs text-green-700">Collected</span>
                   ) : locked ? (
@@ -220,7 +225,7 @@ export const DailyStreakCollector: React.FC = () => {
           </div>
           {streakDays.every((d) => d.collected) && (
             <div className="bg-green-100 text-green-700 px-3 py-2 rounded text-center mt-4 animate-fade-in">
-              🎉 Streak complete! Start again tomorrow.
+              🎉 You've completed the 7-day streak! A new one will start tomorrow.
             </div>
           )}
         </>
@@ -228,4 +233,3 @@ export const DailyStreakCollector: React.FC = () => {
     </div>
   );
 };
-

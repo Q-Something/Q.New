@@ -82,7 +82,7 @@ export function AppSidebar() {
       path: "/q-material",
       isActive: location.pathname.startsWith("/q-material"),
     },
-    // Add Q.Story sidebar entry
+    
     {
       title: "Q.Story",
       icon: Book,
@@ -125,7 +125,7 @@ export function AppSidebar() {
         if (el) {
           el.scrollIntoView({ behavior: "smooth", block: "center" });
         }
-      }, 80); // slight delay
+      }, 80); // silght delay
       // Update the hash without scrolling (prevents jump)
       if (window.location.hash !== "#tbh") {
         window.history.replaceState(
@@ -137,18 +137,18 @@ export function AppSidebar() {
     };
 
     if (location.pathname === "/") {
-      // Already on homepage
+      // 
       scrollToTBH();
       if (isMobile) setState("collapsed");
     } else {
-      // Not on home; navigate to home first, then scroll after route change
+      
       navigate("/#tbh");
       if (isMobile) setState("collapsed");
-      // The homepage TBH effect will scroll on hash change, so nothing else needed here.
+      
     }
   }
 
-  // Escape key closes on mobile
+  // Esc key closes on mobile
   React.useEffect(() => {
     function handleEsc(e: KeyboardEvent) {
       if ((e.key === "Escape" || e.key === "Esc") && state === "expanded" && isMobile) {

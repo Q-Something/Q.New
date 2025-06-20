@@ -10,7 +10,7 @@ const Footer = () => {
           <div className="space-y-4">
             <Link to="/" className="flex items-center gap-2">
               <Book className="h-6 w-6 text-qlearn-purple" />
-              <span className="font-bold text-xl">Q.Learn</span>
+              <span className="font-bold text-xl">Q.Something</span>
             </Link>
             <p className="text-sm text-muted-foreground max-w-xs">
               Empowering students through shared knowledge, collaborative learning, and community-driven resources.
