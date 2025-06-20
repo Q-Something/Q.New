@@ -79,13 +79,47 @@ const LeaderboardPage = () => {
                 : 0;
               const assignedPfp = fallbackAvatars[fallbackIndex];
 
+              const rankClass =
+                idx === 0
+                  ? "text-yellow-500 font-extrabold"
+                  : idx === 1
+                  ? "text-gray-400 font-bold"
+                  : idx === 2
+                  ? "text-amber-500 font-semibold"
+                  : "text-muted-foreground";
+
               return (
-                <li key={leader.user_id} className="flex items-center gap-3 py-2">
-                  <span className="w-6 text-center">#{idx + 1}</span>
-                  <Avatar className="shrink-0 h-10 w-10">
-                    <AvatarImage src={assignedPfp} alt={leader.display_name} />
-                  </Avatar>
-                  <span className="flex-1 truncate">{leader.display_name || "Student"}</span>
+                <li
+                  key={leader.user_id}
+                  className={`flex items-center gap-3 py-2 ${
+                    idx === 0
+                      ? "bg-yellow-50 border-yellow-300 rounded shadow-sm animate-pulse-slow"
+                      : idx === 1
+                      ? "bg-gray-50"
+                      : idx === 2
+                      ? "bg-amber-50"
+                      : ""
+                  }`}
+                >
+                  <span className={`w-6 text-center ${rankClass}`}>#{idx + 1}</span>
+
+                  <div className="relative">
+                    <Avatar
+                      className={`shrink-0 h-10 w-10 ${
+                        idx === 0 ? "ring-2 ring-yellow-400 animate-glow" : ""
+                      }`}
+                    >
+                      <AvatarImage src={assignedPfp} alt={leader.display_name} />
+                    </Avatar>
+
+                    {idx === 0 && (
+                      <div className="absolute -inset-1 rounded-full border-2 border-yellow-400 animate-blaze" />
+                    )}
+                  </div>
+
+                  <span className={`flex-1 truncate ${rankClass}`}>
+                    {leader.display_name || "Student"}
+                  </span>
 
                   <div className="flex flex-col text-xs items-end space-y-1">
                     <span className="text-primary font-semibold">
@@ -115,6 +149,46 @@ const LeaderboardPage = () => {
           ← Back to Home
         </Button>
       </div>
+
+      {/* Custom Blaze Animation Styles */}
+      <style>{`
+        @keyframes glow {
+          0% { box-shadow: 0 0 0px #facc15; }
+          50% { box-shadow: 0 0 8px #facc15; }
+          100% { box-shadow: 0 0 0px #facc15; }
+        }
+
+        .animate-glow {
+          animation: glow 2s infinite;
+        }
+
+        @keyframes blaze {
+          0% {
+            transform: scale(1);
+            opacity: 0.8;
+            box-shadow: 0 0 10px 4px rgba(255, 215, 0, 0.4);
+          }
+          50% {
+            transform: scale(1.08);
+            opacity: 1;
+            box-shadow: 0 0 15px 6px rgba(255, 215, 0, 0.6);
+          }
+          100% {
+            transform: scale(1);
+            opacity: 0.8;
+            box-shadow: 0 0 10px 4px rgba(255, 215, 0, 0.4);
+          }
+        }
+
+        .animate-blaze {
+          animation: blaze 2.2s ease-in-out infinite;
+          z-index: -1;
+        }
+
+        .animate-pulse-slow {
+          animation: pulse 3s infinite;
+        }
+      `}</style>
     </div>
   );
 };
