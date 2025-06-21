@@ -504,23 +504,89 @@ export async function getMessages(roomId: string): Promise<ChatMessage[]> {
 /**
  * Mark all unread messages in a room as read for the current user
  */
+/**
+ * Mark all unread messages in a room as read for the current user
+ * This works like WhatsApp/Instagram where messages are marked as read when the chat is opened
+ */
 export async function markMessagesAsRead(roomId: string): Promise<void> {
   const { data: user } = await supabase.auth.getUser();
   if (!user?.user) return;
-  // Find all messages in this room sent by others that are unread
-  const { data: unreadMessages } = await supabase
-    .from('chat_messages_new')
-    .select('id')
-    .eq('room_id', roomId)
-    .neq('sender_id', user.user.id)
-    .eq('is_read', false);
-
-  const unreadIds = (unreadMessages ?? []).map((msg: any) => msg.id);
-  if (unreadIds.length > 0) {
-    await supabase
+  
+  console.log(`Marking messages as read in room ${roomId} for user ${user.user.id}`);
+  
+  try {
+    // First, let's find all unread messages in this room that aren't from the current user
+    const { data: unreadMessages, error: fetchError } = await supabase
+      .from('chat_messages_new')
+      .select('id')
+      .eq('room_id', roomId)
+      .neq('sender_id', user.user.id)
+      .eq('is_read', false);
+    
+    if (fetchError) {
+      console.error('Error fetching unread messages:', fetchError);
+      return;
+    }
+    
+    const messageIds = (unreadMessages || []).map(msg => msg.id);
+    
+    if (messageIds.length === 0) {
+      console.log('No unread messages to mark as read');
+      return;
+    }
+    
+    console.log(`Marking ${messageIds.length} messages as read`);
+    
+    // Now update all these messages in a single batch
+    const { data: updatedMessages, error: updateError } = await supabase
       .from('chat_messages_new')
       .update({ is_read: true })
-      .in('id', unreadIds);
+      .in('id', messageIds)
+      .select();
+    
+    if (updateError) {
+      console.error('Error marking messages as read:', updateError);
+      return;
+    }
+    
+    console.log(`Successfully marked ${updatedMessages?.length || 0} messages as read`);
+    
+    // Notify all clients about the update using a unique channel name
+    const channelName = `message-read-${roomId}-${Date.now()}`;
+    const channel = supabase.channel(channelName);
+    
+    // Set up a subscription to handle the broadcast
+    channel.subscribe((status) => {
+      if (status === 'SUBSCRIBED') {
+        // Send a broadcast to all clients to refresh their unread counts
+        channel.send({
+          type: 'broadcast',
+          event: 'MESSAGES_READ',
+          payload: { 
+            roomId, 
+            userId: user.user.id,
+            messageCount: updatedMessages?.length || 0,
+            timestamp: new Date().toISOString()
+          }
+        }).then(() => {
+          console.log('Broadcast sent successfully');
+        }).catch(err => {
+          console.error('Error sending broadcast:', err);
+        }).finally(() => {
+          // Clean up the channel after a short delay
+          setTimeout(() => {
+            try {
+              supabase.removeChannel(channel);
+            } catch (e) {
+              console.error('Error cleaning up channel:', e);
+            }
+          }, 1000);
+        });
+      }
+    });
+    
+  } catch (err) {
+    console.error('Error in markMessagesAsRead:', err);
   }
 }
 

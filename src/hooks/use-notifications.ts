@@ -20,6 +20,9 @@ export function useNotifications() {
   const [showMessage, setShowMessage] = useState(false);
   const testBannerTimeout = useRef<NodeJS.Timeout>();
   const messageBannerTimeout = useRef<NodeJS.Timeout>();
+  const timeoutIdRef = useRef<NodeJS.Timeout>();
+  const refreshIntervalRef = useRef<NodeJS.Timeout>();
+  const channelRef = useRef<any>(null);
 
   const fetchIncomplete = async () => {
     if (!user) {
@@ -62,24 +65,45 @@ export function useNotifications() {
         testCount = testIds.filter(id => !submittedTestIds.includes(id)).length;
       }
 
-      // Get unread message count (excluding user's own messages)
+              // Get unread message count (excluding user's own messages)
       let unreadCount = 0;
-      const { data: rooms } = await supabase
-        .from("chat_rooms")
-        .select("id")
-        .or(`user1_id.eq.${user.id},user2_id.eq.${user.id}`);
+      try {
+        // First, get all chat rooms where the current user is a participant
+        const { data: rooms, error: roomsError } = await supabase
+          .from("chat_rooms")
+          .select("id")
+          .or(`user1_id.eq.${user.id},user2_id.eq.${user.id}`);
 
-      const roomIds = (rooms ?? []).map(r => r.id);
+        if (roomsError) {
+          console.error('Error fetching chat rooms:', roomsError);
+          throw roomsError;
+        }
+        
+        const roomIds = (rooms ?? []).map(r => r.id);
 
-      if (roomIds.length > 0) {
-        const { count } = await supabase
-          .from("chat_messages_new")
-          .select("*", { count: "exact", head: true })
-          .in("room_id", roomIds)
-          .neq("sender_id", user.id)
-          .eq("is_read", false);
+        if (roomIds.length > 0) {
+          // Count unread messages across all rooms
+          const { count, error: countError } = await supabase
+            .from("chat_messages_new")
+            .select("*", { count: "exact", head: true })
+            .in("room_id", roomIds)
+            .neq("sender_id", user.id)
+            .eq("is_read", false);
 
-        unreadCount = count || 0;
+          if (countError) {
+            console.error('Error counting unread messages:', countError);
+            throw countError;
+          }
+          
+          unreadCount = count || 0;
+          console.log(`Found ${unreadCount} unread messages across ${roomIds.length} rooms`);
+        } else {
+          console.log('User is not part of any chat rooms');
+        }
+      } catch (error) {
+        console.error('Error in fetchIncomplete:', error);
+        // Don't update the state if there was an error
+        return;
       }
 
       console.log("Notification counts - Tests:", testCount, "Messages:", unreadCount);
@@ -101,34 +125,133 @@ export function useNotifications() {
   useEffect(() => {
     if (!user) return;
 
-    const channel = supabase
-      .channel(`notifications-realtime-${user.id}`)
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "chat_messages_new" },
-        (payload) => {
-          console.log("Realtime message change:", payload);
-          setTimeout(fetchIncomplete, 1000);
-        }
-      )
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "study_test_submissions" },
-        () => {
-          console.log("Realtime test submission change");
-          setTimeout(fetchIncomplete, 1000);
-        }
-      )
-      .subscribe();
+    let channel: any = null;
+    let timeoutId: NodeJS.Timeout;
+    let isMounted = true;
 
+    const setupChannel = () => {
+      if (!isMounted) return;
+      
+      // Clean up any existing channel first
+      if (channel) {
+        try {
+          supabase.removeChannel(channel);
+        } catch (e) {
+          console.error('Error cleaning up channel:', e);
+        }
+      }
+
+      console.log('Setting up real-time notifications channel');
+      
+      channel = supabase.channel(`notifications-realtime-${user.id}-${Date.now()}`);
+      
+      // Listen for new messages
+      channel.on(
+        'postgres_changes',
+        { 
+          event: 'INSERT',
+          schema: 'public',
+          table: 'chat_messages_new',
+          filter: `receiver_id=eq.${user.id}`
+        },
+        (payload: any) => {
+          console.log('New message received:', payload);
+          refreshUnreadCount();
+        }
+      );
+      
+      // Listen for message read updates
+      channel.on(
+        'postgres_changes',
+        { 
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'chat_messages_new',
+          filter: `is_read=eq.true`
+        },
+        (payload: any) => {
+          console.log('Message read status updated:', payload);
+          refreshUnreadCount();
+        }
+      );
+      
+      // Listen for our custom broadcast events
+      channel.on(
+        'broadcast',
+        { event: 'MESSAGES_READ' },
+        (payload: any) => {
+          console.log('Received MESSAGES_READ broadcast:', payload);
+          refreshUnreadCount();
+        }
+      );
+      
+      // Listen for test submission changes
+      channel.on(
+        'postgres_changes',
+        { 
+          event: '*',
+          schema: 'public',
+          table: 'study_test_submissions',
+          filter: `student_id=eq.${user?.id}`
+        },
+        (payload: any) => {
+          console.log('Test submission changed:', payload);
+          refreshUnreadCount();
+        }
+      );
+
+      // Define refresh function
+      const refreshUnreadCount = () => {
+        clearTimeout(timeoutIdRef.current);
+        timeoutIdRef.current = setTimeout(() => {
+          if (user) {
+            fetchIncomplete();
+          }
+        }, 500);
+      };
+
+      // Subscribe to the channel
+      channel.subscribe((status) => {
+        console.log('Channel status:', status);
+        if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CHANNEL_CLOSED') {
+          // Try to reconnect after a delay
+          setTimeout(() => {
+            if (user) {
+              console.log('Reconnecting channel...');
+              setupChannel();
+            }
+          }, 5000);
+        }
+      });
+
+      // Initial fetch
+      refreshUnreadCount();
+    };
+
+    // Setup the channel
+    setupChannel();
+
+    // Cleanup function
     return () => {
-      supabase.removeChannel(channel);
+      clearTimeout(timeoutIdRef.current);
+      clearInterval(refreshIntervalRef.current);
+      
+      if (channelRef.current) {
+        try {
+          console.log('Cleaning up channel');
+          supabase.removeChannel(channelRef.current);
+        } catch (e) {
+          console.error('Error cleaning up channel:', e);
+        }
+      }
     };
   }, [user?.id]);
 
   const handleDismissTest = () => {
     setShowTest(false);
-    clearTimeout(testBannerTimeout.current);
+    if (testBannerTimeout.current) {
+      clearTimeout(testBannerTimeout.current);
+    }
     testBannerTimeout.current = setTimeout(() => {
       if (status.incompleteTestCount > 0) setShowTest(true);
     }, BANNER_REAPPEAR_MS);
@@ -136,7 +259,9 @@ export function useNotifications() {
 
   const handleDismissMessage = () => {
     setShowMessage(false);
-    clearTimeout(messageBannerTimeout.current);
+    if (messageBannerTimeout.current) {
+      clearTimeout(messageBannerTimeout.current);
+    }
     messageBannerTimeout.current = setTimeout(() => {
       if (status.unreadMessageCount > 0) setShowMessage(true);
     }, BANNER_REAPPEAR_MS);
