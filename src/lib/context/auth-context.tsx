@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Session, User } from '@supabase/supabase-js';
@@ -16,7 +15,7 @@ type AuthContextType = {
     error: any | null;
     data: any | null;
   }>;
-  signOut: () => Promise<void>;
+  logout: () => Promise<void>; // Renamed for clarity
   isAuthenticated: boolean;
 };
 
@@ -28,13 +27,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
         setIsLoading(false);
-        
+
         if (event === 'SIGNED_IN') {
           toast.success('Welcome back!');
         }
@@ -44,7 +42,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     );
 
-    // THEN check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
@@ -57,33 +54,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signUp = async (email: string, password: string) => {
-    const response = await supabase.auth.signUp({
-      email,
-      password,
-    });
-    return response;
+    return await supabase.auth.signUp({ email, password });
   };
 
   const signIn = async (email: string, password: string) => {
-    const response = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    
-    return response;
+    return await supabase.auth.signInWithPassword({ email, password });
   };
 
-  const signOut = async () => {
-    await supabase.auth.signOut();
+  const logout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) throw error;
+    setUser(null);
+    setSession(null);
   };
 
-  const value = {
+  const value: AuthContextType = {
     user,
     session,
     isLoading,
     signUp,
     signIn,
-    signOut,
+    logout, // ← Exposed correctly
     isAuthenticated: !!user,
   };
 

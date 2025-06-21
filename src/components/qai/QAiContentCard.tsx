@@ -1,12 +1,20 @@
-// Renders generated learning content using ReactMarkdown, KaTeX and highlights code/LaTeX.
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Sparkles } from "lucide-react";
+import { Sparkles, Download } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import "katex/dist/katex.min.css";
 import { toast } from "sonner";
+import html2pdf from "html2pdf.js";
+import { useRef } from "react";
 
 interface QAiContentCardProps {
   content: {
@@ -30,53 +38,69 @@ const DESCRIPTIONS: Record<string, string> = {
 };
 
 export default function QAiContentCard({ content }: QAiContentCardProps) {
+  const pdfRef = useRef<HTMLDivElement>(null);
+
+  const handleDownloadPDF = () => {
+    if (!pdfRef.current) return;
+
+    const opt = {
+      margin: 0.5,
+      filename: `${content.contentType}-QAi.pdf`,
+      image: { type: "jpeg", quality: 0.98 },
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: "in", format: "letter", orientation: "portrait" },
+    };
+
+    html2pdf().set(opt).from(pdfRef.current).save();
+  };
+
   return (
-    <Card>
+    <Card className="border border-border bg-background">
       <CardHeader>
-        <CardTitle>
+        <CardTitle className="flex items-center gap-2">
           {TITLES[content.contentType]}
-          <span className="ml-2 text-blue-500">
-            <Sparkles className="inline h-4 w-4" />
-          </span>
+          <Sparkles className="text-blue-500 h-4 w-4" />
         </CardTitle>
-        <CardDescription>
-          {DESCRIPTIONS[content.contentType]}
-        </CardDescription>
+        <CardDescription>{DESCRIPTIONS[content.contentType]}</CardDescription>
       </CardHeader>
-      <CardContent>
-        <div className="bg-muted/30 rounded-lg p-4 prose prose-invert max-w-none overflow-x-auto">
+
+      <CardContent className="p-0">
+        <div
+          ref={pdfRef}
+          className="bg-muted/20 px-6 py-4 rounded-lg overflow-x-auto prose prose-invert max-w-none text-sm leading-relaxed"
+        >
           <ReactMarkdown
             remarkPlugins={[remarkMath]}
             rehypePlugins={[rehypeKatex]}
             components={{
               code({ className, children, ...props }) {
-                // Inline code vs. code block: react-markdown uses 'pre > code' for blocks,
-                // and a single 'code' tag with no parent 'pre' for inline.
-                // Here, do NOT use ".inline" prop (does not exist!).
                 const child = String(children).trim();
-                const isBlock = child.includes('\n');
+                const isBlock = child.includes("\n");
+
                 if (isBlock) {
                   return (
-                    <pre className="bg-black/80 rounded p-2 border border-blue-700 my-2 overflow-auto">
+                    <pre className="bg-zinc-900 text-white rounded-lg px-4 py-3 mb-4 overflow-auto border border-zinc-700 text-sm">
                       <code className={className} {...props}>
                         {child}
                       </code>
                     </pre>
                   );
                 }
+
                 return (
-                  <code className="bg-black/30 px-1 rounded text-blue-300" {...props}>
+                  <code className="bg-zinc-800 text-blue-300 px-1.5 py-0.5 rounded text-sm" {...props}>
                     {child}
                   </code>
                 );
-              }
+              },
             }}
           >
             {content.content}
           </ReactMarkdown>
         </div>
       </CardContent>
-      <CardFooter className="flex justify-end gap-2">
+
+      <CardFooter className="justify-end p-4 space-x-2">
         <Button
           variant="outline"
           onClick={() => {
@@ -85,6 +109,10 @@ export default function QAiContentCard({ content }: QAiContentCardProps) {
           }}
         >
           Copy to clipboard
+        </Button>
+        <Button onClick={handleDownloadPDF} variant="default">
+          <Download className="h-4 w-4 mr-2" />
+          Download as PDF
         </Button>
       </CardFooter>
     </Card>

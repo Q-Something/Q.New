@@ -1,10 +1,20 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Book, FileText, HelpCircle, Search } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Book,
+  FileText,
+  HelpCircle,
+  Search,
+} from "lucide-react";
 
 interface QAiPromptFormProps {
   isLoading: boolean;
@@ -25,23 +35,26 @@ export default function QAiPromptForm({ isLoading, onSubmit }: QAiPromptFormProp
   const [bookName, setBookName] = useState("");
   const [exam, setExam] = useState("");
 
-  // Passes contentType to the parent, along with the form info
   const doSubmit = (contentType: 'notes' | 'answer' | 'questions' | 'explain') => {
     onSubmit({ prompt, grade, subject, bookName, exam, contentType });
   };
 
   return (
-    <div>
+    <div className="space-y-6">
+      {/* Topic Input */}
       <div>
         <label className="text-sm font-medium mb-1 block">Topic or Question</label>
         <Textarea
-          placeholder="Enter your topic or question here, e.g., 'Photosynthesis process', 'How to solve quadratic equations'"
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
-          className="h-24"
+          placeholder="E.g., 'Photosynthesis process', 'How to solve quadratic equations'"
+          className="h-24 resize-none"
         />
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-2 mt-4">
+
+      {/* Options Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Grade */}
         <div>
           <label className="text-sm font-medium mb-1 block">Grade (Optional)</label>
           <Select value={grade} onValueChange={setGrade}>
@@ -56,6 +69,8 @@ export default function QAiPromptForm({ isLoading, onSubmit }: QAiPromptFormProp
             </SelectContent>
           </Select>
         </div>
+
+        {/* Subject */}
         <div>
           <label className="text-sm font-medium mb-1 block">Subject (Optional)</label>
           <Select value={subject} onValueChange={setSubject}>
@@ -74,8 +89,8 @@ export default function QAiPromptForm({ isLoading, onSubmit }: QAiPromptFormProp
             </SelectContent>
           </Select>
         </div>
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+        {/* Book */}
         <div>
           <label className="text-sm font-medium mb-1 block">Book (Optional)</label>
           <Input
@@ -84,6 +99,8 @@ export default function QAiPromptForm({ isLoading, onSubmit }: QAiPromptFormProp
             onChange={(e) => setBookName(e.target.value)}
           />
         </div>
+
+        {/* Exam */}
         <div>
           <label className="text-sm font-medium mb-1 block">Exam (Optional)</label>
           <Select value={exam} onValueChange={setExam}>
@@ -101,38 +118,40 @@ export default function QAiPromptForm({ isLoading, onSubmit }: QAiPromptFormProp
           </Select>
         </div>
       </div>
-      <div className="flex flex-wrap gap-3 justify-center pt-4">
+
+      {/* Action Buttons */}
+      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 pt-2">
         <Button
+          variant="outline"
           onClick={() => doSubmit('notes')}
           disabled={isLoading}
-          className="min-w-32"
         >
           <FileText className="mr-2 h-4 w-4" />
-          Generate Notes
+          Notes
         </Button>
         <Button
+          variant="outline"
           onClick={() => doSubmit('answer')}
           disabled={isLoading}
-          className="min-w-32"
         >
           <Search className="mr-2 h-4 w-4" />
-          Answer Question
+          Answer
         </Button>
         <Button
+          variant="outline"
           onClick={() => doSubmit('questions')}
           disabled={isLoading}
-          className="min-w-32"
         >
           <HelpCircle className="mr-2 h-4 w-4" />
-          Generate Questions
+          Questions
         </Button>
         <Button
+          variant="outline"
           onClick={() => doSubmit('explain')}
           disabled={isLoading}
-          className="min-w-32"
         >
           <Book className="mr-2 h-4 w-4" />
-          Explain Concept
+          Explain
         </Button>
       </div>
     </div>

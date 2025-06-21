@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { useAuth } from "@/lib/context/auth-context";
@@ -7,13 +6,24 @@ import type { UserProfile } from "@/lib/api/social-api";
 import {
   getCurrentUserProfile,
   getFollowing,
-  getFollowers
+  getFollowers,
 } from "@/lib/api/social-api";
 import { ProfileOverview } from "@/components/profile/ProfileOverview";
 import { ProfileTabs } from "@/components/profile/ProfileTabs";
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
 
 const Profile = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -54,6 +64,16 @@ const Profile = () => {
     }
   };
 
+  const handleLogout = async () => {
+    try {
+      await logout();
+      toast.success("Logged out successfully");
+      navigate("/auth");
+    } catch (error) {
+      toast.error("Failed to log out");
+    }
+  };
+
   if (!user) {
     return (
       <div className="container py-8 px-4">
@@ -64,7 +84,7 @@ const Profile = () => {
           </p>
           <button
             className="btn btn-primary"
-            onClick={() => window.location.href = "/auth"}
+            onClick={() => (window.location.href = "/auth")}
           >
             Go to Login
           </button>
@@ -86,6 +106,24 @@ const Profile = () => {
   return (
     <div className="container py-8 px-4">
       <div className="max-w-4xl mx-auto">
+        <div className="flex justify-end mb-4">
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive">Logout</Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Are you sure you want to log out?</AlertDialogTitle>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleLogout}>
+                  Yes, Logout
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
         <div className="flex flex-col md:flex-row gap-8">
           <div className="md:w-1/3">
             <ProfileOverview profile={profile} />
