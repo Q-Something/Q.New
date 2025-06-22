@@ -22,6 +22,8 @@ import AdminUploadTest from "./pages/AdminUploadTest";
 import LeaderboardPage from "./pages/Leaderboard";
 import DailyStreakPage from "./pages/DailyStreak";
 import QStory from "./pages/QStory";
+import LearnExplore from "./pages/LearnExplore";
+import Social from "./pages/Social";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -59,6 +61,8 @@ const App = () => (
                 <Route path="/admin/upload-questions" element={<QuestionUploadPage />} />
                 {/* Q.Story page route */}
                 <Route path="/q-story" element={<QStory />} />
+                <Route path="/learn-explore" element={<LearnExplore />} />
+                <Route path="/social" element={<Social />} />
               </Route>
               <Route path="/q-spark/chat/:roomId" element={<ChatRoomPage />} />
               <Route path="/admin-panel" element={<Admin />} />

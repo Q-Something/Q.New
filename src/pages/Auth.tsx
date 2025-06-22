@@ -72,7 +72,7 @@ const Auth = () => {
           <div className="text-center mb-6">
             <Link to="/" className="inline-flex items-center gap-2">
               <Book className="h-8 w-8 text-qlearn-purple" />
-              <span className="font-bold text-2xl">Q.Learn</span>
+              <span className="font-bold text-2xl">Q.Something</span>
             </Link>
           </div>
           

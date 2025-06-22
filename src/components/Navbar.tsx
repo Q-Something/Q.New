@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Button } from "./ui/button";
 import { ThemeToggle } from "./theme-toggle";
 import { Book, UserCircle } from "lucide-react";
-import { useState } from "react";
+import { useMemo } from "react";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -16,9 +16,31 @@ import {
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/context/auth-context";
 
+// Import avatar images
+import pfp1 from "@/assets/pfp/pfp1.png";
+import pfp2 from "@/assets/pfp/pfp2.png";
+import pfp3 from "@/assets/pfp/pfp3.png";
+import pfp4 from "@/assets/pfp/pfp4.png";
+
+// Array of available profile pictures
+const profilePictures = [pfp1, pfp2, pfp3, pfp4];
+
+// Helper function to get a consistent avatar based on user ID
+const getUserAvatar = (userId?: string) => {
+  if (!userId) return profilePictures[0];
+  // Simple hash function to get a consistent index
+  const hash = userId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  return profilePictures[hash % profilePictures.length];
+};
+
 const Navbar = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const { user, signOut } = useAuth();
+  const { user } = useAuth();
+  // Get consistent avatar for the user based on their ID
+  const userAvatar = useMemo(() => {
+    // Use the user's email if available, otherwise fall back to a default avatar
+    const userId = user?.email || 'default-user';
+    return getUserAvatar(userId);
+  }, [user?.email]);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -35,22 +57,6 @@ const Navbar = () => {
         <div className="hidden md:flex md:gap-x-6 items-center">
           <NavigationMenu>
             <NavigationMenuList>
-              <NavigationMenuItem>
-                <NavigationMenuTrigger>Tools</NavigationMenuTrigger>
-                <NavigationMenuContent>
-                  <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
-                    <ListItem href="/q-ai" title={<><span className="text-blue-500">Q</span><span>.Ai</span></>}>
-                      Upload and analyze book pages to generate notes, questions, and find related videos
-                    </ListItem>
-                    <ListItem href="/q-material" title={<><span className="text-blue-500">Q</span><span>.Material</span></>}>
-                      Share and download study materials from the community
-                    </ListItem>
-                    <ListItem href="/q-spark" title={<><span className="text-blue-500">Q</span><span>.Spark</span></>}>
-                      Find and connect with study partners with similar goals
-                    </ListItem>
-                  </ul>
-                </NavigationMenuContent>
-              </NavigationMenuItem>
               <NavigationMenuItem>
                 <Link to="/discover">
                   <NavigationMenuLink className={navigationMenuTriggerStyle()}>
@@ -74,93 +80,33 @@ const Navbar = () => {
           )}
         </div>
 
-        {/* Mobile Navigation */}
-        <div className="flex items-center md:hidden gap-2">
+        {/* Mobile Navigation - Simplified with just theme toggle and profile */}
+        <div className="flex items-center gap-2 md:hidden">
           <ThemeToggle />
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="text-base"
-            onClick={() => setIsOpen(!isOpen)}
-          >
-            <span className="sr-only">Toggle Menu</span>
-            {!isOpen ? (
-              <svg
-                className="h-6 w-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 6h16M4 12h16M4 18h16"
+          <Link to={user ? "/profile" : "/auth"} className="ml-1">
+            <Button variant="ghost" size="icon" className="rounded-full h-10 w-10">
+              {user ? (
+                <img 
+                  src={userAvatar}
+                  alt="Profile"
+                  className="h-6 w-6 rounded-full object-cover"
+                  onError={(e) => {
+                    // Fallback to UserCircle if image fails to load
+                    const target = e.target as HTMLImageElement;
+                    target.style.display = 'none';
+                    const fallback = document.createElement('div');
+                    fallback.className = 'flex items-center justify-center h-6 w-6';
+                    fallback.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>`;
+                    target.parentNode?.insertBefore(fallback, target);
+                  }}
                 />
-              </svg>
-            ) : (
-              <svg
-                className="h-6 w-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            )}
-          </Button>
+              ) : (
+                <UserCircle className="h-6 w-6" />
+              )}
+            </Button>
+          </Link>
         </div>
       </div>
-
-      {/* Mobile Menu */}
-      {isOpen && (
-        <div className="container pb-4 pt-2 md:hidden">
-          <nav className="flex flex-col space-y-3">
-            <Link
-              to="/discover"
-              className="rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground"
-              onClick={() => setIsOpen(false)}
-            >
-              Discover
-            </Link>
-            <Link
-              to="/q-ai"
-              className="rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground"
-              onClick={() => setIsOpen(false)}
-            >
-              <span className="text-blue-500">Q</span>.Ai
-            </Link>
-            <Link
-              to="/q-material"
-              className="rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground"
-              onClick={() => setIsOpen(false)}
-            >
-              <span className="text-blue-500">Q</span>.Material
-            </Link>
-            <Link
-              to="/q-spark"
-              className="rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground"
-              onClick={() => setIsOpen(false)}
-            >
-              <span className="text-blue-500">Q</span>.Spark
-            </Link>
-            <Link
-              to={user ? "/profile" : "/auth"}
-              className="rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground"
-              onClick={() => setIsOpen(false)}
-            >
-              {user ? "Profile" : "Login"}
-            </Link>
-          </nav>
-        </div>
-      )}
     </header>
   );
 };

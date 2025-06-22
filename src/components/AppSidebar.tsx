@@ -28,6 +28,8 @@ import {
   Flame,
   X,
   Book,
+  Compass,
+  Users2,
 } from "lucide-react";
 import * as React from "react";
 
@@ -47,20 +49,20 @@ export function AppSidebar() {
       path: "/",
       isActive: location.pathname === "/",
     },
-    {
-      title: "Q.Study",
-      icon: ListChecks,
-      iconColor: "text-green-600",
-      path: "/qstudy",
-      isActive: location.pathname.startsWith("/qstudy"),
-    },
-    {
-      title: "Leaderboard",
-      icon: Trophy,
-      iconColor: "text-yellow-500",
-      path: "/leaderboard",
-      isActive: location.pathname.startsWith("/leaderboard"),
-    },
+    // {
+    //   title: "Q.Study",
+    //   icon: ListChecks,
+    //   iconColor: "text-green-600",
+    //   path: "/qstudy",
+    //   isActive: location.pathname.startsWith("/qstudy"),
+    // },
+    // {
+    //   title: "Leaderboard",
+    //   icon: Trophy,
+    //   iconColor: "text-yellow-500",
+    //   path: "/leaderboard",
+    //   isActive: location.pathname.startsWith("/leaderboard"),
+    // },
     {
       title: "Daily Streak & Points",
       icon: Flame,
@@ -68,27 +70,41 @@ export function AppSidebar() {
       path: "/daily-streak",
       isActive: location.pathname.startsWith("/daily-streak"),
     },
-    {
-      title: "Q.Ai",
-      icon: BookOpen,
-      iconColor: "text-indigo-500",
-      path: "/q-ai",
-      isActive: location.pathname.startsWith("/q-ai"),
-    },
-    {
-      title: "Q.Material",
-      icon: Upload,
-      iconColor: "text-purple-600",
-      path: "/q-material",
-      isActive: location.pathname.startsWith("/q-material"),
-    },
+    // {
+    //   title: "Q.Ai",
+    //   icon: BookOpen,
+    //   iconColor: "text-indigo-500",
+    //   path: "/q-ai",
+    //   isActive: location.pathname.startsWith("/q-ai"),
+    // },
+    // {
+    //   title: "Q.Material",
+    //   icon: Upload,
+    //   iconColor: "text-purple-600",
+    //   path: "/q-material",
+    //   isActive: location.pathname.startsWith("/q-material"),
+    // },
     
+    // {
+    //   title: "Q.Story",
+    //   icon: Book,
+    //   iconColor: "text-amber-600",
+    //   path: "/q-story",
+    //   isActive: location.pathname.startsWith("/q-story"),
+    // },
     {
-      title: "Q.Story",
-      icon: Book,
-      iconColor: "text-amber-600",
-      path: "/q-story",
-      isActive: location.pathname.startsWith("/q-story"),
+      title: "Learn & Explore",
+      icon: Compass,
+      iconColor: "text-rose-500",
+      path: "/learn-explore",
+      isActive: location.pathname.startsWith("/learn-explore"),
+    },
+    {
+      title: "Social",
+      icon: Users2,
+      iconColor: "text-sky-500",
+      path: "/social",
+      isActive: location.pathname.startsWith("/social"),
     },
     {
       title: "Q.Spark (Chat)",
@@ -105,16 +121,16 @@ export function AppSidebar() {
       path: "/profile",
       isActive: location.pathname.startsWith("/profile"),
     },
-    {
-      title: "TBH!",
-      icon: BookOpen,
-      iconColor: "text-blue-500",
-      path: "/#tbh",
-      isActive:
-        location.pathname === "/" &&
-        (window.location.hash === "#tbh" || window.location.hash === "#TBH" || window.location.hash.includes("tbh")),
-      isTBHAnchor: true,
-    },
+    // {
+    //   title: "TBH!",
+    //   icon: BookOpen,
+    //   iconColor: "text-blue-500",
+    //   path: "/#tbh",
+    //   isActive:
+    //     location.pathname === "/" &&
+    //     (window.location.hash === "#tbh" || window.location.hash === "#TBH" || window.location.hash.includes("tbh")),
+    //   isTBHAnchor: true,
+    // },
   ];
 
   // Custom handler for TBH navigation

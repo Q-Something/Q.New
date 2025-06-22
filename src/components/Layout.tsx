@@ -11,6 +11,8 @@ import {
 } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import { PhantomBabaWidget } from "./PhantomBabaWidget";
+import { useEffect, useState } from "react";
+import MobileBottomNav from "./MobileBottomNav";
 
 // SidebarOpener must be inside SidebarProvider!
 const SidebarOpener = () => {
@@ -45,34 +47,51 @@ const SidebarOpener = () => {
 };
 
 const LayoutContent = () => {
+  const [isMobileView, setIsMobileView] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const {
+    incompleteTestCount,
+    unreadMessageCount,
+    showTestBanner,
+    showMessageBanner,
+    handleDismissTest,
+    handleDismissMessage,
+  } = useNotifications();
+  const { state } = useSidebar();
+
+  useEffect(() => {
+    const checkIfMobile = () => {
+      setIsMobileView(window.innerWidth < 768);
+    };
+
+    // Initial check
+    checkIfMobile();
+
+    // Add event listener for window resize
+    window.addEventListener('resize', checkIfMobile);
+
+    // Cleanup
+    return () => window.removeEventListener('resize', checkIfMobile);
+  }, []);
+
   let errorMsg = "";
   try {
-    const navigate = useNavigate();
-    const location = useLocation();
-    const {
-      incompleteTestCount,
-      unreadMessageCount,
-      showTestBanner,
-      showMessageBanner,
-      handleDismissTest,
-      handleDismissMessage,
-    } = useNotifications();
-    const { state, isMobile } = useSidebar();
 
     // Sidebar layout: allow sidebar everywhere except on certain minimal full-pages
     const showSidebar = !["/auth", "/admin"].some((r) => location.pathname.startsWith(r));
-    const sidebarWidth = showSidebar && state === "expanded" && !isMobile ? "ml-[13rem]" : "ml-0";
+    const sidebarWidth = showSidebar && state === "expanded" && !isMobileView ? "ml-[13rem]" : "ml-0";
 
     return (
       <div className="flex min-h-screen w-full">
-        {showSidebar && (
+        {showSidebar && !isMobileView && (
           <>
             <AppSidebar />
             <SidebarOpener />
           </>
         )}
         {/* Main Content */}
-        <div className={`flex flex-col flex-1 min-h-screen transition-all duration-300 ease-in-out ${sidebarWidth}`}>
+        <div className={`flex flex-col flex-1 min-h-screen transition-all duration-300 ease-in-out ${isMobileView ? 'ml-0' : sidebarWidth}`}>
           {/* NotificationBanners */}
           <NotificationBanner
             show={showTestBanner}
@@ -104,13 +123,13 @@ const LayoutContent = () => {
           />
           <Navbar />
           <SidebarInset>
-            <main className="flex-1">
+            <main className="flex-1 pb-16 md:pb-0">
               <Outlet />
             </main>
           </SidebarInset>
           <Footer />
         </div>
-        {/* === Add Phantom Baba Widget, not interfering with sidebar === */}
+        {isMobileView && <MobileBottomNav />}
         <PhantomBabaWidget />
       </div>
     );

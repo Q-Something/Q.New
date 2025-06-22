@@ -46,28 +46,25 @@ export const PhantomBabaWidget: React.FC = () => {
 
   return (
     <>
-      {/* Floating Widget */}
-      <div
-        className="fixed z-[990] bottom-6 right-6 sm:bottom-4 sm:right-4 flex flex-col items-end"
+      {/* Floating Widget - Hidden on mobile when bottom nav is present */}
+      <div className="fixed z-[990] bottom-20 right-4 sm:bottom-6 sm:right-6 flex flex-col items-end md:block"
         style={{ pointerEvents: open ? "none" : "auto" }}
       >
         {/* Tooltip / Speech bubble */}
-        {!open && (
+        {!open && showTooltip && (
           <div
-            className={`bg-white text-gray-800 shadow-lg rounded-xl px-4 py-2 mb-2 max-w-xs border border-gray-200 text-[15px] leading-tight animate-fade-in
-              ${showTooltip ? "block" : "hidden"}`
-            }
+            className={`bg-white dark:bg-gray-800 text-gray-800 dark:text-white shadow-lg rounded-lg px-4 py-2 mb-2 max-w-xs border border-gray-200 dark:border-gray-700 text-sm md:text-base leading-tight animate-fade-in`}
             style={{ fontFamily: "Quicksand, Inter, sans-serif" }}
           >
             <span className="select-none">
-            ➤ Feeling demotivated? Meet <span className="italic font-semibold text-blue-600">Phantom Baba</span> <span role="img" aria-label="ghost">👻</span>
+              ➤ Feeling demotivated? Meet <span className="italic font-semibold text-blue-600 dark:text-blue-400">Phantom Baba</span> <span role="img" aria-label="ghost">👻</span>
             </span>
           </div>
         )}
         {/* Avatar Button */}
         <button
           aria-label="Open Phantom Baba"
-          className="rounded-full bg-white shadow-lg border-2 border-blue-300 p-1 flex items-center justify-center
+          className="rounded-full bg-white dark:bg-gray-800 shadow-lg border-2 border-blue-300 dark:border-blue-700 p-1 flex items-center justify-center
             hover:scale-110 transition-transform relative overflow-hidden
             focus:outline-none focus:ring-2 focus:ring-blue-400"
           style={{ width: WIDGET_SIZE, height: WIDGET_SIZE }}
@@ -84,6 +81,7 @@ export const PhantomBabaWidget: React.FC = () => {
           />
         </button>
       </div>
+
       {/* Full-screen Modal and Speech Bubble */}
       {open && (
         <div
