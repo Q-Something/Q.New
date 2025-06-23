@@ -1,0 +1,45 @@
+{
+  "stream": "General",
+  "cards": [
+    {
+      "id": "gen1",
+      "term": "The Scientific Method",
+      "definition": "A systematic approach to research where a problem is identified, a hypothesis is formulated, and experiments are conducted to test the hypothesis.",
+      "category": "Science",
+      "wikiUrl": "https://en.wikipedia.org/wiki/Scientific_method",
+      "emoji": "🔬"
+    },
+    {
+      "id": "gen2",
+      "term": "Critical Thinking",
+      "definition": "The objective analysis and evaluation of an issue in order to form a judgment, involving skills such as analysis, interpretation, inference, explanation, and self-regulation.",
+      "category": "Study Skills",
+      "wikiUrl": "https://en.wikipedia.org/wiki/Critical_thinking",
+      "emoji": "💭"
+    },
+    {
+      "id": "gen3",
+      "term": "Time Management",
+      "definition": "The process of organizing and planning how to divide your time between specific activities to work smarter, not harder.",
+      "category": "Study Skills",
+      "wikiUrl": "https://en.wikipedia.org/wiki/Time_management",
+      "emoji": "⏱️"
+    },
+    {
+      "id": "gen4",
+      "term": "Effective Note-taking",
+      "definition": "The practice of recording information from different sources and platforms to create organized, meaningful notes that enhance learning and retention.",
+      "category": "Study Skills",
+      "wikiUrl": "https://en.wikipedia.org/wiki/Note-taking",
+      "emoji": "✍️"
+    },
+    {
+      "id": "gen5",
+      "term": "Digital Literacy",
+      "definition": "The ability to use information and communication technologies to find, evaluate, create, and communicate information, requiring both cognitive and technical skills.",
+      "category": "Technology",
+      "wikiUrl": "https://en.wikipedia.org/wiki/Digital_literacy",
+      "emoji": "💻"
+    }
+  ]
+}

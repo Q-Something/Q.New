@@ -1,0 +1,29 @@
+{
+  "stream": "PCB",
+  "cards": [
+    {
+      "id": "pcb1",
+      "term": "Human Physiology",
+      "definition": "The scientific study of the functions and mechanisms in a living system, focusing on how organisms, organ systems, and organs carry out chemical and physical functions.",
+      "category": "Biology",
+      "wikiUrl": "https://en.wikipedia.org/wiki/Physiology",
+      "emoji": "🧬"
+    },
+    {
+      "id": "pcb2",
+      "term": "Organic Chemistry",
+      "definition": "The study of the structure, properties, composition, reactions, and preparation of carbon-containing compounds.",
+      "category": "Chemistry",
+      "wikiUrl": "https://en.wikipedia.org/wiki/Organic_chemistry",
+      "emoji": "⚗️"
+    },
+    {
+      "id": "pcb3",
+      "term": "Genetics",
+      "definition": "The study of genes, genetic variation, and heredity in living organisms, considered to be an important aspect in the study of biology.",
+      "category": "Biology",
+      "wikiUrl": "https://en.wikipedia.org/wiki/Genetics",
+      "emoji": "🧬"
+    }
+  ]
+}

@@ -1,0 +1,116 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Increase app base font size */
+html {
+  font-size: 18px;
+}
+
+body {
+  font-size: 1.13rem;
+  @apply bg-background text-foreground;
+}
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+    --radius: 0.5rem;
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* New variables for alerts */
+    --success: 122 39% 49%;
+    --warning: 35 100% 65%;
+    --hero-gradient: linear-gradient(135deg, #4C84FF, #874CFF);
+  }
+
+  .dark {
+    /* Primary bg: #121212        → hsl(0, 0%, 7%) */
+    --background: 0 0% 7%;
+    /* Secondary bg: #1E1E2F     → hsl(240, 21%, 15%) */
+    --card: 240 21% 15%;
+    --popover: 240 21% 15%;
+    --secondary: 240 21% 15%;
+    --accent: 240 21% 15%;
+    --muted: 240 21% 15%;
+    /* Accent (buttons, highlights): #4C84FF → hsl(220, 100%, 65%) */
+    --primary: 220 100% 65%;
+    --sidebar-primary: 220 100% 65%;
+    --ring: 220 100% 65%;
+    /* Card, sidebar text     → text-primary: #FFF, text-secondary: #B0B3C5 */
+    --foreground: 0 0% 100%;
+    --card-foreground: 0 0% 100%;
+    --popover-foreground: 0 0% 100%;
+    --primary-foreground: 0 0% 100%;
+    --secondary-foreground: 230 15% 73%;
+    --muted-foreground: 230 15% 73%;
+    --accent-foreground: 230 15% 73%;
+    --sidebar-foreground: 230 15% 73%;
+    /* Borders, dividers: #2C2F4A → hsl(235, 25%, 23%) */
+    --border: 235 25% 23%;
+    --input: 235 25% 23%;
+    --sidebar-border: 235 25% 23%;
+    /* Success: #4CAF50        → hsl(122, 39%, 49%) */
+    --success: 122 39% 49%;
+    /* Error: #EF5350          → hsl(4, 82%, 63%) */
+    --destructive: 4 82% 63%;
+    --destructive-foreground: 0 0% 100%;
+    /* Warning: #FFB74D        → hsl(35, 100%, 65%) */
+    --warning: 35 100% 65%;
+    /* Sidebar ring: accent */
+    --sidebar-ring: 220 100% 65%;
+    /* Custom gradient variable for banners/cards */
+    --hero-gradient: linear-gradient(135deg, #4C84FF, #874CFF);
+  }
+}
+
+/* Card/Sidebar/Divider styling in dark */
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  /* Example: gradient utility - can override in tailwind.config as well */
+  .bg-hero-gradient {
+    background: linear-gradient(135deg, #4C84FF, #874CFF);
+  }
+  .border-divider {
+    border-color: hsl(235, 25%, 23%);
+  }
+}
+
+/* Sidebar specific shrinkage */
+.sidebar,
+[data-state='expanded'] {
+  font-size: 0.92rem !important;
+  width: 12rem !important;
+}
+

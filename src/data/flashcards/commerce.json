@@ -1,0 +1,29 @@
+{
+  "stream": "Commerce",
+  "cards": [
+    {
+      "id": "com1",
+      "term": "Principles of Accounting",
+      "definition": "The systematic process of recording, classifying, and summarizing financial transactions to provide useful information for business decisions.",
+      "category": "Accountancy",
+      "wikiUrl": "https://en.wikipedia.org/wiki/Accounting",
+      "emoji": "📊"
+    },
+    {
+      "id": "com2",
+      "term": "Business Studies",
+      "definition": "The study of how businesses are organized and managed, and how they interact with their economic, social, and political environments.",
+      "category": "Business",
+      "wikiUrl": "https://en.wikipedia.org/wiki/Business_studies",
+      "emoji": "🏢"
+    },
+    {
+      "id": "com3",
+      "term": "Economics Fundamentals",
+      "definition": "The study of how individuals, businesses, and societies allocate scarce resources to satisfy unlimited wants and needs.",
+      "category": "Economics",
+      "wikiUrl": "https://en.wikipedia.org/wiki/Economics",
+      "emoji": "💹"
+    }
+  ]
+}

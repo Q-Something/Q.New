@@ -1,0 +1,29 @@
+{
+  "stream": "Humanities",
+  "cards": [
+    {
+      "id": "hum1",
+      "term": "World History",
+      "definition": "The study of past events, particularly in human affairs, on a global scale, examining the development of civilizations, cultures, and societies over time.",
+      "category": "History",
+      "wikiUrl": "https://en.wikipedia.org/wiki/World_history",
+      "emoji": "🌍"
+    },
+    {
+      "id": "hum2",
+      "term": "Political Science",
+      "definition": "The study of government systems, political activities, political thoughts, and political behavior, including the analysis of political systems and political behavior.",
+      "category": "Political Science",
+      "wikiUrl": "https://en.wikipedia.org/wiki/Political_science",
+      "emoji": "🏛️"
+    },
+    {
+      "id": "hum3",
+      "term": "Introduction to Psychology",
+      "definition": "The scientific study of the human mind and its functions, especially those affecting behavior in a given context.",
+      "category": "Psychology",
+      "wikiUrl": "https://en.wikipedia.org/wiki/Psychology",
+      "emoji": "🧠"
+    }
+  ]
+}

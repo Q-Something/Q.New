@@ -1,0 +1,29 @@
+{
+  "stream": "PCM",
+  "cards": [
+    {
+      "id": "pcm1",
+      "term": "Newton's Laws of Motion",
+      "definition": "Three fundamental laws that describe the relationship between a body and the forces acting upon it, and its motion in response to those forces.",
+      "category": "Physics",
+      "wikiUrl": "https://en.wikipedia.org/wiki/Newton%27s_laws_of_motion",
+      "emoji": "📜"
+    },
+    {
+      "id": "pcm2",
+      "term": "Chemical Bonding",
+      "definition": "The process by which atoms combine to form compounds through different types of chemical bonds: ionic, covalent, and metallic.",
+      "category": "Chemistry",
+      "wikiUrl": "https://en.wikipedia.org/wiki/Chemical_bond",
+      "emoji": "⚛️"
+    },
+    {
+      "id": "pcm3",
+      "term": "Calculus Basics",
+      "definition": "The mathematical study of continuous change, including concepts of limits, derivatives, integrals, and infinite series.",
+      "category": "Mathematics",
+      "wikiUrl": "https://en.wikipedia.org/wiki/Calculus",
+      "emoji": "∫"
+    }
+  ]
+}
