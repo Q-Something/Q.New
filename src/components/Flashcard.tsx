@@ -116,8 +116,6 @@ export function Flashcard() {
     );
   }
 
-  // Don't show anything if there are no flashcards
-  if (!flashcards.length) return null;
 
   const currentCard = flashcards[currentIndex];
 

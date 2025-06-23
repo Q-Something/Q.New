@@ -7,7 +7,7 @@ export interface UserProfile {
   uid: string;
   age: number | null;
   class: string | null;
-  stream?: string | null;
+  stream: string | null;
   education: string | null;
   hobbies: string | null;
   exam_prep: string | null;
@@ -387,9 +387,20 @@ export async function sendMessage(
       type: 'broadcast',
       event: 'message_sent',
       payload: { roomId, senderId: user.user.id }
+    }).then(() => {
+      console.log('Message sent successfully');
+    }).catch(err => {
+      console.error('Error sending broadcast:', err);
+    }).finally(() => {
+      // Clean up the channel after a short delay
+      setTimeout(() => {
+        try {
+          supabase.removeChannel(channel);
+        } catch (e) {
+          console.error('Error cleaning up channel:', e);
+        }
+      }, 1000);
     });
-
-    console.log('Message sent successfully');
   } catch (error) {
     console.error('Error sending message:', error);
     throw error;
