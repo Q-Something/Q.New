@@ -1,4 +1,3 @@
-
 -- Fix function: cast role_name to app_role to compare ENUM to text properly
 CREATE OR REPLACE FUNCTION public.has_role(user_id uuid, role_name text)
 RETURNS boolean
@@ -26,3 +25,12 @@ CREATE POLICY "Admins can update TBH questions"
   ON public.tbh_questions
   FOR UPDATE
   USING (public.has_role(auth.uid(), 'admin'));
+
+-- Add onboarding_complete column to profiles table
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS onboarding_complete BOOLEAN NOT NULL DEFAULT FALSE;
+
+-- Set onboarding_complete to false for all existing users (if needed)
+UPDATE public.profiles SET onboarding_complete = FALSE WHERE onboarding_complete IS NULL;
+
+-- Add mbti column to profiles table
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS mbti text;

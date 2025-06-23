@@ -6,22 +6,6 @@ import { useQSparkActivityFeed } from "./hooks/useQSparkActivityFeed";
 import { QSparkTrending } from "./QSparkTrending";
 import { Avatar } from "@/components/ui/avatar";
 
-// Local fallback avatars
-import pfp1 from "@/assets/pfp/pfp1.png";
-import pfp2 from "@/assets/pfp/pfp2.png";
-import pfp3 from "@/assets/pfp/pfp3.png";
-import pfp4 from "@/assets/pfp/pfp4.png";
-
-const fallbackAvatars = [pfp1, pfp2, pfp3, pfp4];
-
-// Helper to get consistent fallback avatar
-function getFallbackAvatar(userId?: string): string {
-  if (!userId) return fallbackAvatars[0];
-  const numericPart = userId.replace(/\D/g, "");
-  const index = numericPart ? parseInt(numericPart.slice(-1)) % fallbackAvatars.length : 0;
-  return fallbackAvatars[index];
-}
-
 interface QSparkHomeDashboardProps {
   currentProfile: any;
   onProfileClick: () => void;
@@ -47,7 +31,7 @@ export function QSparkHomeDashboard({
             !
           </h2>
           <p className="text-muted-foreground mb-4">
-            Let’s connect, learn, and grow together on Q.Spark.
+            Let's connect, learn, and grow together on Q.Spark.
           </p>
 
           <div className="grid grid-cols-3 gap-2 mb-4">
@@ -131,7 +115,7 @@ function QSparkActivityFeed() {
   return (
     <ul className="text-sm space-y-2">
       {activity.follows.map((f: any) => {
-        const avatarSrc = getFallbackAvatar(f.following?.id);
+        const avatarSrc = f.following?.avatar_url || f.following?.display_name?.charAt(0) || "";
         return (
           <li key={"spark-" + f.id} className="flex items-center gap-2">
             <Avatar className="w-6 h-6">

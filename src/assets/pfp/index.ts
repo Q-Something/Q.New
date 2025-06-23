@@ -1,9 +1,6 @@
 
 const profilePictures = [
-  '/src/assets/pfp/pfp1.jpg',
-  '/src/assets/pfp/pfp2.jpg',
-  '/src/assets/pfp/pfp3.jpg',
-  '/src/assets/pfp/pfp4.jpg',
+  // Remove all references to pfp1.jpg, pfp2.jpg, pfp3.jpg, pfp4.jpg
 ];
 
 export const getRandomProfilePicture = (): string => {

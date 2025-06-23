@@ -5,25 +5,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { SparkProfile, toggleSpark } from "@/lib/api/spark-api";
 import { toast } from "sonner";
 import { useState } from "react";
 import { formatSparksWithPoints } from "@/utils/sparkDisplay";
-
-// 🖼️ Local fallback avatars
-import pfp1 from "@/assets/pfp/pfp1.png";
-import pfp2 from "@/assets/pfp/pfp2.png";
-import pfp3 from "@/assets/pfp/pfp3.png";
-import pfp4 from "@/assets/pfp/pfp4.png";
-const fallbackAvatars = [pfp1, pfp2, pfp3, pfp4];
-
-function getFallbackAvatar(userId?: string): string {
-  const index = userId ? parseInt(userId.replace(/\D/g, "").slice(-1)) % fallbackAvatars.length : 0;
-  return fallbackAvatars[index];
-}
 
 interface ProfileDetailDialogProps {
   profile: SparkProfile | null;
@@ -91,10 +79,13 @@ export function ProfileDetailDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-3">
             <Avatar className="h-12 w-12 bg-primary">
-              <AvatarImage
-                src={getFallbackAvatar(profile.id)}
-                alt={profile.display_name || "User"}
-              />
+              {profile.avatar_url ? (
+                <AvatarImage src={profile.avatar_url} alt={profile.display_name || "User"} />
+              ) : (
+                <span className="h-12 w-12 flex items-center justify-center rounded-full bg-muted text-xl font-bold">
+                  {profile.display_name?.[0]?.toUpperCase() || profile.email?.[0]?.toUpperCase() || "U"}
+                </span>
+              )}
             </Avatar>
             <div>
               <h2 className="text-xl font-semibold">{profile.display_name}</h2>

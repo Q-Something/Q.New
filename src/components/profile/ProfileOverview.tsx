@@ -16,12 +16,6 @@ import { ProfileLeaderboardSummary } from "@/components/profile/ProfileLeaderboa
 import { ProfileStreakSummary } from "@/components/profile/ProfileStreakSummary";
 import type { UserProfile } from "@/lib/api/social-api";
 
-// 🖼️ Import your default PFPs
-import pfp1 from "@/assets/pfp/pfp1.png";
-import pfp2 from "@/assets/pfp/pfp2.png";
-import pfp3 from "@/assets/pfp/pfp3.png";
-import pfp4 from "@/assets/pfp/pfp4.png";
-
 export function ProfileOverview({ profile }: { profile: UserProfile }) {
   const [imageError, setImageError] = useState(false);
 
@@ -34,28 +28,20 @@ export function ProfileOverview({ profile }: { profile: UserProfile }) {
       .filter(Boolean);
   };
 
-  // 🎲 Fallback avatar selection
-  const fallbackAvatars = [pfp1, pfp2, pfp3, pfp4];
-  const fallbackIndex = profile.id
-    ? parseInt(profile.id.replace(/\D/g, "").slice(-1)) % 4
-    : 0;
-  const assignedPfp = profile.avatar_url || fallbackAvatars[fallbackIndex];
-
   return (
     <Card>
       <CardHeader className="text-center">
         <Avatar className="w-24 h-24 mx-auto mb-4">
-          {!imageError && (
+          {!imageError && profile.avatar_url ? (
             <AvatarImage
-              src={assignedPfp}
+              src={profile.avatar_url}
               alt="Profile"
               onError={() => setImageError(true)}
             />
-          )}
-          {(imageError || !assignedPfp) && (
-            <AvatarFallback className="text-2xl">
-              {profile.display_name?.substring(0, 2).toUpperCase() || "ST"}
-            </AvatarFallback>
+          ) : (
+            <span className="h-24 w-24 flex items-center justify-center rounded-full bg-muted text-4xl font-bold">
+              {profile.display_name?.[0]?.toUpperCase() || profile.email?.[0]?.toUpperCase() || "U"}
+            </span>
           )}
         </Avatar>
 

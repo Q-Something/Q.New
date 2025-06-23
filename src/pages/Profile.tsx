@@ -21,6 +21,15 @@ import {
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
+const mbtiTypes = [
+  "INTJ", "INTP", "ENTJ", "ENTP",
+  "INFJ", "INFP", "ENFJ", "ENFP",
+  "ISTJ", "ISFJ", "ESTJ", "ESFJ",
+  "ISTP", "ISFP", "ESTP", "ESFP"
+];
 
 const Profile = () => {
   const { user, logout } = useAuth();
@@ -29,6 +38,9 @@ const Profile = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [following, setFollowing] = useState<UserProfile[]>([]);
   const [followers, setFollowers] = useState<UserProfile[]>([]);
+  const [showMBTIDialog, setShowMBTIDialog] = useState(false);
+  const [mbti, setMBTI] = useState("");
+  const [savingMBTI, setSavingMBTI] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -37,6 +49,12 @@ const Profile = () => {
     }
     // eslint-disable-next-line
   }, [user]);
+
+  useEffect(() => {
+    if (profile && !profile.mbti) {
+      setShowMBTIDialog(true);
+    }
+  }, [profile]);
 
   const loadProfile = async () => {
     try {
@@ -74,6 +92,24 @@ const Profile = () => {
     }
   };
 
+  const handleSaveMBTI = async () => {
+    if (!mbti) {
+      toast.error("Please select your MBTI type.");
+      return;
+    }
+    setSavingMBTI(true);
+    try {
+      await updateUserProfile({ mbti });
+      toast.success("Personality type saved!");
+      setShowMBTIDialog(false);
+      loadProfile();
+    } catch (error) {
+      toast.error("Failed to update personality type");
+    } finally {
+      setSavingMBTI(false);
+    }
+  };
+
   if (!user) {
     return (
       <div className="container py-8 px-4">
@@ -105,6 +141,30 @@ const Profile = () => {
 
   return (
     <div className="container py-8 px-4">
+      <Dialog open={showMBTIDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Choose Your Personality Type</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <Select value={mbti} onValueChange={setMBTI} required>
+              <SelectTrigger>
+                <SelectValue placeholder="Select your MBTI type" />
+              </SelectTrigger>
+              <SelectContent>
+                {mbtiTypes.map(opt => (
+                  <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <DialogFooter>
+              <Button onClick={handleSaveMBTI} disabled={savingMBTI || !mbti} className="w-full">
+                {savingMBTI ? "Saving..." : "Save"}
+              </Button>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
       <div className="max-w-4xl mx-auto">
         <div className="flex justify-end mb-4">
           <AlertDialog>

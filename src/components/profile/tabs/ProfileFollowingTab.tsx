@@ -1,4 +1,3 @@
-
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -21,10 +20,13 @@ export function ProfileFollowingTab({ following }: { following: UserProfile[] })
                 className="flex items-center gap-3 p-3 border rounded-lg"
               >
                 <Avatar>
-                  <AvatarImage src={user.avatar_url || ""} />
-                  <AvatarFallback>
-                    {user.display_name?.substring(0, 2).toUpperCase()}
-                  </AvatarFallback>
+                  {user.avatar_url ? (
+                    <AvatarImage src={user.avatar_url} />
+                  ) : (
+                    <span className="h-10 w-10 flex items-center justify-center rounded-full bg-muted text-lg font-bold">
+                      {user.display_name?.[0]?.toUpperCase() || user.email?.[0]?.toUpperCase() || "U"}
+                    </span>
+                  )}
                 </Avatar>
                 <div className="flex-1">
                   <h4 className="font-semibold">

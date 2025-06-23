@@ -235,9 +235,9 @@ export function ChatRoom({
           {otherUser.avatar_url ? (
             <AvatarImage src={otherUser.avatar_url} alt={otherUser.display_name} />
           ) : (
-            <AvatarFallback>
-              {otherUser.display_name?.substring(0, 2).toUpperCase() || "ST"}
-            </AvatarFallback>
+            <span className="h-10 w-10 flex items-center justify-center rounded-full bg-muted text-lg font-bold">
+              {otherUser.display_name?.[0]?.toUpperCase() || otherUser.email?.[0]?.toUpperCase() || "U"}
+            </span>
           )}
         </Avatar>
         <div className="flex-1">

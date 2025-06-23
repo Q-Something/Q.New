@@ -1,12 +1,14 @@
 import QAiContainer from "@/components/qai/QAiContainer";
 import QAiContentCard from "@/components/qai/QAiContentCard";
 import { useState } from "react";
+import { Loader2 } from "lucide-react";
 
 const QAi = () => {
   const [generatedContent, setGeneratedContent] = useState<{
     content: string;
     contentType: "notes" | "answer" | "questions" | "explain";
   } | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   return (
     <div className="container py-10 px-4">
@@ -28,12 +30,18 @@ const QAi = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Left: Prompt + Input */}
           <div className="bg-muted/30 p-4 rounded-xl border border-border shadow-sm">
-            <QAiContainer onContentGenerated={setGeneratedContent} />
+            <QAiContainer onContentGenerated={setGeneratedContent} setIsLoading={setIsLoading} />
           </div>
 
           {/* Right: AI Response */}
           <div className="bg-background p-4 rounded-xl border border-border shadow-sm max-h-[75vh] overflow-y-auto">
-            {generatedContent ? (
+            {isLoading ? (
+              <div className="flex flex-col items-center justify-center h-full text-center">
+                <Loader2 className="h-10 w-10 animate-spin text-blue-500 mb-4" />
+                <p className="text-lg font-semibold">Generating your content...</p>
+                <p className="text-sm text-muted-foreground">This may take a few seconds.</p>
+              </div>
+            ) : generatedContent ? (
               <QAiContentCard content={generatedContent} />
             ) : (
               <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground">

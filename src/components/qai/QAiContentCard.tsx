@@ -67,7 +67,7 @@ export default function QAiContentCard({ content }: QAiContentCardProps) {
       <CardContent className="p-0">
         <div
           ref={pdfRef}
-          className="bg-muted/20 px-6 py-4 rounded-lg overflow-x-auto prose prose-invert max-w-none text-sm leading-relaxed"
+          className="bg-muted/20 px-6 py-4 rounded-lg overflow-x-auto min-h-64 break-words whitespace-pre-line w-full prose prose-invert max-w-none text-sm leading-relaxed"
         >
           <ReactMarkdown
             remarkPlugins={[remarkMath]}

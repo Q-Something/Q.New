@@ -18,10 +18,11 @@ interface GeneratedContent {
 
 interface QAiContainerProps {
   onContentGenerated: (content: GeneratedContent) => void;
+  setIsLoading?: (loading: boolean) => void;
 }
 
-export default function QAiContainer({ onContentGenerated }: QAiContainerProps) {
-  const [isLoading, setIsLoading] = useState(false);
+export default function QAiContainer({ onContentGenerated, setIsLoading }: QAiContainerProps) {
+  const [isLoading, setLocalIsLoading] = useState(false);
   const [content, setContent] = useState<GeneratedContent | null>(null);
 
   const handleGenerate = async ({
@@ -77,7 +78,8 @@ Requirements:
 - Be concise, accurate, and easy to understand.
 `;
 
-    setIsLoading(true);
+    setLocalIsLoading(true);
+    if (setIsLoading) setIsLoading(true);
     toast.info(`Generating ${contentType}...`);
 
     try {
@@ -109,7 +111,8 @@ Requirements:
       console.error(err);
       toast.error("Something went wrong. Please try again.");
     } finally {
-      setIsLoading(false);
+      setLocalIsLoading(false);
+      if (setIsLoading) setIsLoading(false);
     }
   };
 

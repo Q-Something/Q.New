@@ -1,16 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Medal, Coins, Upload } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { fetchTopUsers } from "@/lib/api/leaderboard-api";
-
-// Local fallback avatars
-import pfp1 from "@/assets/pfp/pfp1.png";
-import pfp2 from "@/assets/pfp/pfp2.png";
-import pfp3 from "@/assets/pfp/pfp3.png";
-import pfp4 from "@/assets/pfp/pfp4.png";
-
-const fallbackAvatars = [pfp1, pfp2, pfp3, pfp4];
 
 interface LeaderboardCardProps {
   currentUserId?: string;
@@ -61,11 +53,6 @@ export const LeaderboardCard: React.FC<LeaderboardCardProps> = ({
 
       <ol className="divide-y">
         {leaders.map((leader, idx) => {
-          const fallbackIndex = leader.user_id
-            ? parseInt(leader.user_id.replace(/\D/g, "").slice(-1)) % fallbackAvatars.length
-            : 0;
-          const assignedPfp = fallbackAvatars[fallbackIndex];
-
           return (
             <li
               key={leader.user_id}
@@ -78,7 +65,13 @@ export const LeaderboardCard: React.FC<LeaderboardCardProps> = ({
                   "shrink-0 h-10 w-10"
                 )}
               >
-                <AvatarImage src={assignedPfp} alt={leader.display_name} />
+                {leader.avatar_url ? (
+                  <AvatarImage src={leader.avatar_url} alt={leader.display_name} />
+                ) : (
+                  <AvatarFallback>
+                    {leader.display_name?.[0]?.toUpperCase() || "U"}
+                  </AvatarFallback>
+                )}
               </Avatar>
               <span className="flex-1 truncate">{leader.display_name || "Student"}</span>
 

@@ -14,11 +14,13 @@ export interface UserProfile {
   instagram: string | null;
   discord: string | null;
   avatar_url: string | null;
+  mbti: string | null;
   followers_count: number;
   following_count: number;
   mutual_sparks_count: number;
   is_following?: boolean;
   is_mutual?: boolean;
+  onboarding_complete?: boolean;
 }
 
 export interface ChatRoom {

@@ -110,7 +110,7 @@ export function AppSidebar() {
       title: "Q.Spark (Chat)",
       icon: MessageSquare,
       iconColor: "text-pink-500",
-      path: "/q-spark",
+      path: "/q-spark?tab=messages",
       isActive: location.pathname.startsWith("/q-spark"),
       badge: unreadMessageCount > 0 ? unreadMessageCount : undefined,
     },

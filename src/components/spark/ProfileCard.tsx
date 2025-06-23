@@ -1,7 +1,7 @@
 import {
   Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle,
 } from "@/components/ui/card";
-import { Avatar } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Bookmark, BookmarkCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -9,19 +9,6 @@ import { SparkProfile, toggleSpark } from "@/lib/api/spark-api";
 import { toast } from "sonner";
 import { useState } from "react";
 import { formatSparksWithPoints } from "@/utils/sparkDisplay";
-
-// ✅ Local fallback avatars
-import pfp1 from "@/assets/pfp/pfp1.png";
-import pfp2 from "@/assets/pfp/pfp2.png";
-import pfp3 from "@/assets/pfp/pfp3.png";
-import pfp4 from "@/assets/pfp/pfp4.png";
-const fallbackAvatars = [pfp1, pfp2, pfp3, pfp4];
-
-// ✅ Avatar selector based on user ID
-function getFallbackAvatar(userId?: string): string {
-  const index = userId ? parseInt(userId.replace(/\D/g, "").slice(-1)) % fallbackAvatars.length : 0;
-  return fallbackAvatars[index];
-}
 
 interface ProfileCardProps {
   profile: SparkProfile;
@@ -77,11 +64,13 @@ export function ProfileCard({ profile, onProfileClick, onSparkToggled }: Profile
             onClick={() => onProfileClick(profile)}
           >
             <Avatar className="bg-primary w-10 h-10">
-              <img
-                src={getFallbackAvatar(profile.id)}
-                alt={profile.display_name || "User"}
-                className="w-full h-full rounded-full object-cover"
-              />
+              {profile.avatar_url ? (
+                <img src={profile.avatar_url} alt={profile.display_name || "User"} className="w-full h-full rounded-full object-cover" />
+              ) : (
+                <AvatarFallback>
+                  {profile.display_name?.[0]?.toUpperCase() || "U"}
+                </AvatarFallback>
+              )}
             </Avatar>
             <div>
               <CardTitle className="text-base">{profile.display_name}</CardTitle>
@@ -91,6 +80,11 @@ export function ProfileCard({ profile, onProfileClick, onSparkToggled }: Profile
                   {formatSparksWithPoints(localSparkCount)}
                 </span>
               </CardDescription>
+              {profile.mbti && (
+                <div className="text-xs mt-1 text-muted-foreground">
+                  Personality: <span className="font-semibold">{profile.mbti}</span>
+                </div>
+              )}
             </div>
           </div>
 

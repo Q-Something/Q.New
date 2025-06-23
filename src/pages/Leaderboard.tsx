@@ -1,18 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Loader2, Coins, Upload } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/lib/context/auth-context";
 import { fetchTopUsers } from "@/lib/api/leaderboard-api";
-
-// Local fallback avatars
-import pfp1 from "@/assets/pfp/pfp1.png";
-import pfp2 from "@/assets/pfp/pfp2.png";
-import pfp3 from "@/assets/pfp/pfp3.png";
-import pfp4 from "@/assets/pfp/pfp4.png";
-
-const fallbackAvatars = [pfp1, pfp2, pfp3, pfp4];
 
 const LeaderboardPage = () => {
   const [leaders, setLeaders] = useState<any[]>([]);
@@ -74,11 +66,6 @@ const LeaderboardPage = () => {
         ) : (
           <ol className="divide-y rounded-md border p-4 bg-white shadow">
             {leaders.map((leader, idx) => {
-              const fallbackIndex = leader.user_id
-                ? parseInt(leader.user_id.replace(/\D/g, "").slice(-1)) % fallbackAvatars.length
-                : 0;
-              const assignedPfp = fallbackAvatars[fallbackIndex];
-
               const rankClass =
                 idx === 0
                   ? "text-yellow-500 font-extrabold"
@@ -104,12 +91,14 @@ const LeaderboardPage = () => {
                   <span className={`w-6 text-center ${rankClass}`}>#{idx + 1}</span>
 
                   <div className="relative">
-                    <Avatar
-                      className={`shrink-0 h-10 w-10 ${
-                        idx === 0 ? "ring-2 ring-yellow-400 animate-glow" : ""
-                      }`}
-                    >
-                      <AvatarImage src={assignedPfp} alt={leader.display_name} />
+                    <Avatar className="h-10 w-10">
+                      {leader.avatar_url ? (
+                        <AvatarImage src={leader.avatar_url} alt={leader.display_name} />
+                      ) : (
+                        <AvatarFallback>
+                          {leader.display_name?.[0]?.toUpperCase() || "U"}
+                        </AvatarFallback>
+                      )}
                     </Avatar>
 
                     {idx === 0 && (

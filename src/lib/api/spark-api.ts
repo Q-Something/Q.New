@@ -11,6 +11,7 @@ export interface SparkProfile {
   discord: string | null;
   sparked: boolean;
   spark_count: number;
+  mbti: string | null;
 }
 
 export async function fetchProfiles(): Promise<SparkProfile[]> {
@@ -31,7 +32,7 @@ export async function fetchProfiles(): Promise<SparkProfile[]> {
 
     const { data: profiles, error } = await supabase
       .from("profiles")
-      .select("*")
+      .select("id, display_name, username, age, education, hobbies, instagram, discord, spark_count, mbti")
       .order("spark_count", { ascending: false });
 
     if (error) throw error;
@@ -49,6 +50,7 @@ export async function fetchProfiles(): Promise<SparkProfile[]> {
       discord: profile.discord,
       sparked: sparked.includes(profile.id),
       spark_count: profile.spark_count || 0,
+      mbti: profile.mbti || null,
     }));
   } catch (error) {
     console.error("Error fetching profiles:", error);
@@ -95,6 +97,7 @@ export async function fetchSparkedProfiles(): Promise<SparkProfile[]> {
       discord: profile.discord,
       sparked: true,
       spark_count: profile.spark_count || 0,
+      mbti: profile.mbti || null,
     }));
   } catch (error) {
     console.error("Error fetching sparked profiles:", error);

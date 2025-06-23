@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Medal } from "lucide-react";
 import FeatureCard from "@/components/FeatureCard";
 import { BookOpen, Upload, Users } from "lucide-react";
+import { getCurrentUserProfile } from "@/lib/api/social-api";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -25,6 +26,16 @@ const Index = () => {
       }, 80);
     }
   }, []);
+
+  useEffect(() => {
+    if (user) {
+      getCurrentUserProfile().then((profile) => {
+        if (profile && !profile.onboarding_complete) {
+          navigate("/onboarding");
+        }
+      });
+    }
+  }, [user, navigate]);
 
   const routes = {
     leaderboard: "/leaderboard",

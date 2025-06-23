@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,6 +21,29 @@ interface FormProps {
 
 const streamOptions = ["PCM", "PCB", "Commerce", "Humanities"];
 
+const mbtiTypes = [
+  "INTJ", "INTP", "ENTJ", "ENTP",
+  "INFJ", "INFP", "ENFJ", "ENFP",
+  "ISTJ", "ISFJ", "ESTJ", "ESFJ",
+  "ISTP", "ISFP", "ESTP", "ESFP"
+];
+const mbtiToGroup: Record<string, string> = {
+  INTJ: "analyst", INTP: "analyst", ENTJ: "analyst", ENTP: "analyst",
+  INFJ: "diplomat", INFP: "diplomat", ENFJ: "diplomat", ENFP: "diplomat",
+  ISTJ: "sentinel", ISFJ: "sentinel", ESTJ: "sentinel", ESFJ: "sentinel",
+  ISTP: "explorer", ISFP: "explorer", ESTP: "explorer", ESFP: "explorer"
+};
+const groupToAvatar: Record<string, string> = {
+  analyst: "/assets/analyst.png",
+  diplomat: "/assets/diplomat.png",
+  sentinel: "/assets/sentinel.png",
+  explorer: "/assets/explorer.png"
+};
+function getAvatarForMBTI(mbti: string): string {
+  const group = mbtiToGroup[mbti];
+  return groupToAvatar[group] || "/assets/analyst.png";
+}
+
 export function ProfileEditForm({ profile, refreshProfile }: FormProps) {
   const [formData, setFormData] = useState({
     display_name: profile.display_name || "",
@@ -34,9 +56,9 @@ export function ProfileEditForm({ profile, refreshProfile }: FormProps) {
     discord: profile.discord || "",
     stream:
       (profile.class === "11th" || profile.class === "12th")
-        ? // Only try to access stream if exists (TypeScript safe access)
-          (profile as any).stream || ""
-        : ""
+        ? (profile as any).stream || ""
+        : "",
+    mbti: profile.mbti || ""
   });
   const [isSaving, setIsSaving] = useState(false);
 
@@ -53,19 +75,18 @@ export function ProfileEditForm({ profile, refreshProfile }: FormProps) {
       stream:
         (profile.class === "11th" || profile.class === "12th")
           ? (profile as any).stream || ""
-          : ""
+          : "",
+      mbti: profile.mbti || ""
     });
   }, [profile]);
 
   const handleSave = async () => {
     try {
       setIsSaving(true);
-
       let stream: string | null =
         formData.class === "11th" || formData.class === "12th"
           ? formData.stream || null
           : null;
-
       const updates: Partial<UserProfile> & { stream?: string | null } = {
         display_name: formData.display_name,
         uid: formData.uid,
@@ -75,9 +96,10 @@ export function ProfileEditForm({ profile, refreshProfile }: FormProps) {
         exam_prep: formData.exam_prep || null,
         instagram: formData.instagram || null,
         discord: formData.discord || null,
+        mbti: formData.mbti,
+        avatar_url: getAvatarForMBTI(formData.mbti)
       };
       if (stream !== null) updates["stream"] = stream;
-
       await updateUserProfile(updates);
       toast.success("Profile updated successfully!");
       refreshProfile();
@@ -233,6 +255,25 @@ export function ProfileEditForm({ profile, refreshProfile }: FormProps) {
           />
         </div>
       </div>
+
+      <div>
+        <Label htmlFor="mbti">MBTI Personality Type *</Label>
+        <Select
+          value={formData.mbti}
+          onValueChange={value => setFormData(prev => ({ ...prev, mbti: value }))}
+          required
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select your MBTI type" />
+          </SelectTrigger>
+          <SelectContent>
+            {mbtiTypes.map(opt => (
+              <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
       <Button type="submit" disabled={isSaving} className="w-full">
         <Save className="w-4 h-4 mr-2" />
         {isSaving ? "Saving..." : "Save Profile"}

@@ -1,9 +1,7 @@
-
 import { Link } from "react-router-dom";
 import { Button } from "./ui/button";
 import { ThemeToggle } from "./theme-toggle";
 import { Book, UserCircle } from "lucide-react";
-import { useMemo } from "react";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -16,31 +14,10 @@ import {
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/context/auth-context";
 
-// Import avatar images
-import pfp1 from "@/assets/pfp/pfp1.png";
-import pfp2 from "@/assets/pfp/pfp2.png";
-import pfp3 from "@/assets/pfp/pfp3.png";
-import pfp4 from "@/assets/pfp/pfp4.png";
-
-// Array of available profile pictures
-const profilePictures = [pfp1, pfp2, pfp3, pfp4];
-
-// Helper function to get a consistent avatar based on user ID
-const getUserAvatar = (userId?: string) => {
-  if (!userId) return profilePictures[0];
-  // Simple hash function to get a consistent index
-  const hash = userId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  return profilePictures[hash % profilePictures.length];
-};
-
 const Navbar = () => {
   const { user } = useAuth();
-  // Get consistent avatar for the user based on their ID
-  const userAvatar = useMemo(() => {
-    // Use the user's email if available, otherwise fall back to a default avatar
-    const userId = user?.email || 'default-user';
-    return getUserAvatar(userId);
-  }, [user?.email]);
+  // Get avatar for the user from their profile
+  const userAvatar = user?.user_metadata?.avatar_url;
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -70,7 +47,13 @@ const Navbar = () => {
           {user ? (
             <Link to="/profile">
               <Button variant="ghost" size="icon" className="rounded-full">
-                <UserCircle className="h-6 w-6" />
+                {userAvatar ? (
+                  <img src={userAvatar} alt="Profile" className="h-6 w-6 rounded-full object-cover" />
+                ) : (
+                  <span className="h-6 w-6 flex items-center justify-center rounded-full bg-muted text-lg font-bold">
+                    {user.user_metadata?.display_name?.[0]?.toUpperCase() || user.email?.[0]?.toUpperCase() || "U"}
+                  </span>
+                )}
               </Button>
             </Link>
           ) : (
@@ -86,20 +69,17 @@ const Navbar = () => {
           <Link to={user ? "/profile" : "/auth"} className="ml-1">
             <Button variant="ghost" size="icon" className="rounded-full h-10 w-10">
               {user ? (
-                <img 
-                  src={userAvatar}
-                  alt="Profile"
-                  className="h-6 w-6 rounded-full object-cover"
-                  onError={(e) => {
-                    // Fallback to UserCircle if image fails to load
-                    const target = e.target as HTMLImageElement;
-                    target.style.display = 'none';
-                    const fallback = document.createElement('div');
-                    fallback.className = 'flex items-center justify-center h-6 w-6';
-                    fallback.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>`;
-                    target.parentNode?.insertBefore(fallback, target);
-                  }}
-                />
+                userAvatar ? (
+                  <img 
+                    src={userAvatar}
+                    alt="Profile"
+                    className="h-6 w-6 rounded-full object-cover"
+                  />
+                ) : (
+                  <span className="h-6 w-6 flex items-center justify-center rounded-full bg-muted text-lg font-bold">
+                    {user.user_metadata?.display_name?.[0]?.toUpperCase() || user.email?.[0]?.toUpperCase() || "U"}
+                  </span>
+                )
               ) : (
                 <UserCircle className="h-6 w-6" />
               )}

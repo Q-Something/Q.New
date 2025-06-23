@@ -1,4 +1,3 @@
-
 import { useRef, useEffect, useState } from "react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -47,9 +46,9 @@ export default function MessageItem({
           {otherUser.avatar_url ? (
             <AvatarImage src={otherUser.avatar_url} alt={otherUser.display_name} />
           ) : (
-            <AvatarFallback className="text-xs">
-              {otherUser.display_name?.substring(0,2).toUpperCase()}
-            </AvatarFallback>
+            <span className="h-8 w-8 flex items-center justify-center rounded-full bg-muted text-base font-bold">
+              {otherUser.display_name?.[0]?.toUpperCase() || otherUser.email?.[0]?.toUpperCase() || "U"}
+            </span>
           )}
         </Avatar>
       )}

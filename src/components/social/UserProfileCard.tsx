@@ -1,24 +1,11 @@
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { UserProfile, followUser, unfollowUser } from "@/lib/api/social-api";
 import { toast } from "sonner";
 import { useState } from "react";
 import { MessageCircle, UserPlus, UserMinus } from "lucide-react";
-
-import pfp1 from "@/assets/pfp/pfp1.png";
-import pfp2 from "@/assets/pfp/pfp2.png";
-import pfp3 from "@/assets/pfp/pfp3.png";
-import pfp4 from "@/assets/pfp/pfp4.png";
-
-const fallbackAvatars = [pfp1, pfp2, pfp3, pfp4];
-
-function getFallbackAvatar(userId: string | undefined): string {
-  if (!userId) return fallbackAvatars[0];
-  const index = parseInt(userId.replace(/\D/g, "").slice(-1)) % fallbackAvatars.length;
-  return fallbackAvatars[index];
-}
 
 interface UserProfileCardProps {
   profile: UserProfile;
@@ -75,10 +62,13 @@ export function UserProfileCard({
             onClick={() => onProfileClick?.(profile)}
           >
             <Avatar className="h-12 w-12">
-              <AvatarImage
-                src={profile.avatar_url || getFallbackAvatar(profile.id)}
-                alt={profile.display_name}
-              />
+              {profile.avatar_url ? (
+                <AvatarImage src={profile.avatar_url} alt={profile.display_name} />
+              ) : (
+                <span className="h-12 w-12 flex items-center justify-center rounded-full bg-muted text-xl font-bold">
+                  {profile.display_name?.[0]?.toUpperCase() || profile.email?.[0]?.toUpperCase() || "U"}
+                </span>
+              )}
             </Avatar>
             <div className="flex-1 min-w-0">
               <CardTitle className="text-base truncate">{profile.display_name}</CardTitle>

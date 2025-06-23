@@ -24,6 +24,7 @@ import DailyStreakPage from "./pages/DailyStreak";
 import QStory from "./pages/QStory";
 import LearnExplore from "./pages/LearnExplore";
 import Social from "./pages/Social";
+import Onboarding from "./pages/Onboarding";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -57,6 +58,7 @@ const App = () => (
                 <Route path="/leaderboard" element={<LeaderboardPage />} />
                 <Route path="/daily-streak" element={<DailyStreakPage />} />
                 <Route path="/auth" element={<Auth />} />
+                <Route path="/onboarding" element={<Onboarding />} />
                 <Route path="/admin/upload-test" element={<AdminUploadTest />} />
                 <Route path="/admin/upload-questions" element={<QuestionUploadPage />} />
                 {/* Q.Story page route */}
