@@ -1,23 +1,23 @@
 import { supabase } from "@/integrations/supabase/client";
 
 export interface UserProfile {
-  id: string;
-  display_name: string;
-  username: string;
-  uid: string;
-  age: number | null;
-  class: string | null;
-  stream: string | null;
-  education: string | null;
-  hobbies: string | null;
-  exam_prep: string | null;
-  instagram: string | null;
-  discord: string | null;
-  avatar_url: string | null;
-  mbti: string | null;
-  followers_count: number;
-  following_count: number;
-  mutual_sparks_count: number;
+  id?: string;
+  display_name?: string;
+  username?: string;
+  uid?: string;
+  age?: number | null;
+  class?: string | null;
+  stream?: string | null;
+  education?: string | null;
+  hobbies?: string | null;
+  exam_prep?: string | null;
+  instagram?: string | null;
+  discord?: string | null;
+  avatar_url?: string | null;
+  mbti?: string | null;
+  followers_count?: number;
+  following_count?: number;
+  mutual_sparks_count?: number;
   is_following?: boolean;
   is_mutual?: boolean;
   onboarding_complete?: boolean;
@@ -270,7 +270,7 @@ export async function getFollowers(): Promise<UserProfile[]> {
   }
 }
 
-export async function getChatRooms(): Promise<ChatRoom[]> {
+export async function getChatRooms(): Promise<(ChatRoom & { unread_count: number })[]> {
   try {
     const { data: user } = await supabase.auth.getUser();
     if (!user?.user) return [];
@@ -279,29 +279,43 @@ export async function getChatRooms(): Promise<ChatRoom[]> {
       .from('chat_rooms')
       .select('*')
       .or(`user1_id.eq.${user.user.id},user2_id.eq.${user.user.id}`)
-      .order('updated_at', { ascending: false });
+      .order('last_message_at', { ascending: false });
 
     if (error) throw error;
 
-    // Get other user profiles for each room
-    const roomsWithUsers = await Promise.all(
+    // Get other user profiles and unread counts for each room
+    const roomsWithUsersAndUnread = await Promise.all(
       (rooms || []).map(async (room) => {
         const otherUserId = room.user1_id === user.user.id ? room.user2_id : room.user1_id;
-        
         const { data: otherUser } = await supabase
           .from('profiles')
           .select('*')
           .eq('id', otherUserId)
           .single();
-
+        // Get unread count
+        const unread_count = await getUnreadMessageCount(room.id);
         return {
           ...room,
-          other_user: otherUser
+          other_user: otherUser,
+          unread_count,
         };
       })
     );
 
-    return roomsWithUsers;
+    // Sort by last_message_at (most recent first)
+    roomsWithUsersAndUnread.sort((a, b) => {
+      if (!a.last_message_at) return 1;
+      if (!b.last_message_at) return -1;
+      return new Date(b.last_message_at).getTime() - new Date(a.last_message_at).getTime();
+    });
+
+    // Debug: log the order and timestamps
+    console.log('Chat room order after sorting:');
+    roomsWithUsersAndUnread.forEach(room => {
+      console.log(`Room ${room.id} with user ${room.other_user?.display_name}: last_message_at = ${room.last_message_at}`);
+    });
+
+    return roomsWithUsersAndUnread;
   } catch (error) {
     console.error('Error getting chat rooms:', error);
     throw error;
@@ -375,13 +389,16 @@ export async function sendMessage(
     if (error) throw error;
 
     // Update room's last_message_at
-    await supabase
+    const { error: updateError } = await supabase
       .from('chat_rooms')
       .update({
         updated_at: new Date().toISOString(),
         last_message_at: new Date().toISOString()
       })
       .eq('id', roomId);
+    if (updateError) {
+      console.error('Error updating last_message_at in chat_rooms:', updateError);
+    }
 
     // Broadcast the message for instant updates
     const channel = supabase.channel(`room-${roomId}-realtime`);

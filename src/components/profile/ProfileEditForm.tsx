@@ -161,7 +161,7 @@ export function ProfileEditForm({ profile, refreshProfile }: FormProps) {
           />
         </div>
         <div>
-          <Label htmlFor="class">Class</Label>
+          <Label htmlFor="class">Class/Course</Label>
           <Select
             value={formData.class}
             onValueChange={(value) =>
@@ -180,6 +180,7 @@ export function ProfileEditForm({ profile, refreshProfile }: FormProps) {
               <SelectItem value="10th">10th Grade</SelectItem>
               <SelectItem value="11th">11th Grade</SelectItem>
               <SelectItem value="12th">12th Grade</SelectItem>
+              <SelectItem value="cee">CEE</SelectItem>
               <SelectItem value="college">College</SelectItem>
               <SelectItem value="other">Other</SelectItem>
             </SelectContent>
@@ -217,7 +218,7 @@ export function ProfileEditForm({ profile, refreshProfile }: FormProps) {
           id="exam_prep"
           value={formData.exam_prep}
           onChange={(e) => setFormData((prev) => ({ ...prev, exam_prep: e.target.value }))}
-          placeholder="JEE, NEET, SAT, etc."
+          placeholder="JEE, NEET, SAT, CEE, etc."
         />
       </div>
 

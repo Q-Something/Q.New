@@ -1,4 +1,3 @@
-
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UserPlus, Brain, MessageCircle, Home } from "lucide-react";
 import { useState } from "react";
@@ -151,26 +150,34 @@ export function QSparkTabs({
         </div>
         <div className="space-y-4">
           {chatRooms.length > 0 ? (
-            chatRooms.map((room: any) => (
-              <div
-                key={room.id}
-                className="flex items-center gap-3 p-4 bg-muted/30 rounded-lg cursor-pointer hover:bg-muted/50 transition-colors"
-                onClick={() => handleChatRoomClick(room)}
-              >
-                <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-white font-semibold">
-                  {room.other_user?.display_name?.substring(0, 2).toUpperCase() || 'ST'}
-                </div>
-                <div className="flex-1">
-                  <h4 className="font-semibold">{room.other_user?.display_name}</h4>
-                  <p className="text-sm text-muted-foreground">@{room.other_user?.uid}</p>
-                </div>
-                <div className="text-sm text-muted-foreground">
-                  {room.last_message_at && (
-                    <p>{new Date(room.last_message_at).toLocaleDateString()}</p>
+            chatRooms.map((room: any) => {
+              const isUnread = room.unread_count > 0;
+              return (
+                <div
+                  key={room.id}
+                  className={`flex items-center gap-3 p-4 rounded-lg cursor-pointer transition-colors bg-muted/30 hover:bg-muted/50 ${isUnread ? 'font-bold bg-blue-50' : ''}`}
+                  onClick={() => handleChatRoomClick(room)}
+                >
+                  <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-white font-semibold">
+                    {room.other_user?.display_name?.substring(0, 2).toUpperCase() || 'ST'}
+                  </div>
+                  <div className="flex-1">
+                    <h4 className={`font-semibold ${isUnread ? 'text-blue-900' : ''}`}>{room.other_user?.display_name}</h4>
+                    <p className="text-sm text-muted-foreground">@{room.other_user?.uid}</p>
+                  </div>
+                  {isUnread && (
+                    <span className="ml-2 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-600 rounded-full">
+                      {room.unread_count}
+                    </span>
                   )}
+                  <div className="text-sm text-muted-foreground ml-2">
+                    {room.last_message_at && (
+                      <p>{new Date(room.last_message_at).toLocaleDateString()}</p>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))
+              );
+            })
           ) : (
             <div className="text-center py-12 bg-muted/30 rounded-lg">
               <MessageCircle className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
